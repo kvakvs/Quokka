@@ -5,6 +5,8 @@
 ///
 extern crate qk_term;
 extern crate chrono;
+#[macro_use]
+extern crate bitflags;
 
 pub mod stream_event;
 pub mod data_stream;
@@ -13,10 +15,10 @@ pub mod execute_function_trace_event;
 
 #[cfg(test)]
 mod tests {
-    use crate::stream_event::StreamEvent;
+  use crate::stream_event::StreamEvent;
 
-    #[test]
-    fn try_create_event() {
-        let se1 = StreamEvent::SendMessageEvent(p1, p2, "");
-    }
+  #[test]
+  fn try_create_event() {
+    let se1 = StreamEvent::SendMessageEvent(p1, p2, "");
+  }
 }

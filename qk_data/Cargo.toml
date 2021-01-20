@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 qk_term = { path = "../qk_term" }
 chrono = "0.4.0"
+bitflags = "1.2.1"
