@@ -12,8 +12,8 @@ use crate::data_stream::eflame_log::errors::EflameError;
 
 #[derive(Debug)]
 pub struct EflameLogStream {
-  filename: String,
-  lines: Vec<EflameLogLine>,
+  pub filename: String,
+  pub lines: Vec<EflameLogLine>,
 }
 
 impl EflameLogStream {

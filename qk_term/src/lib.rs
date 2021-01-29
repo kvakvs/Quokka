@@ -8,6 +8,7 @@ pub mod term;
 pub mod binary;
 pub mod pid;
 pub mod atom;
+pub mod mfarity;
 
 // #[cfg(test)]
 // mod tests {

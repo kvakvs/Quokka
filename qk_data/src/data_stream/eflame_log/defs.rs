@@ -1,5 +1,5 @@
 use qk_term::pid::Pid;
-use crate::mfarity::{MFArity, MFArityValue};
+use qk_term::mfarity::MFArity;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ExecutionTime {

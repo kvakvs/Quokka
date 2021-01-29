@@ -7,10 +7,10 @@ use qk_data::data_stream::eflame_log::{parser, EflameLogStream};
 use qk_data::data_stream::eflame_log::parser::parse_test;
 
 fn main() {
-  parse_test();
+  // parse_test();
 
-  // let ef_log = EflameLogStream::new("eflame_log.txt").unwrap();
-  // println!("Log loaded:\n{:?}", ef_log)
+  let ef_log = EflameLogStream::new("eflame_log.txt").unwrap();
+  ef_log.lines.iter().for_each(|line| { println!("{:?}", line) })
 
   // start_gui();
 }

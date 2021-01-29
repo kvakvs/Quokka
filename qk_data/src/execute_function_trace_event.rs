@@ -2,7 +2,7 @@ use qk_term::pid::Pid;
 
 use crate::stream_event::{TStreamEvent, UtcDatetime};
 use std::time::Duration;
-use crate::mfarity::MFArityIndex;
+use qk_term::mfarity::MFArity;
 
 /// Represents event of timed function call with the stack trace.
 /// This is usually produced by Eflame-style tracers.
@@ -11,7 +11,7 @@ pub struct ExecuteFunctionTraceEvent {
   pid: Pid,
 
   /// Call stack of indices into the lookup map of MFArity objects
-  stack: Vec<MFArityIndex>,
+  stack: Vec<MFArity>,
 
   /// Microseconds spent in this function
   time_duration: std::time::Duration,

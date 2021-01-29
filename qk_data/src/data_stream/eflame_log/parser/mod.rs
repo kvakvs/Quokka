@@ -2,11 +2,11 @@ pub mod atom;
 
 use qk_term::pid::Pid;
 use nom::IResult;
-use crate::mfarity::{MFArity, MFArityValue};
 use nom::combinator::map_res;
 use crate::data_stream::eflame_log::defs::{ExecutionTime, EflameLogLine, EflameValue};
 use nom::error::Error;
 use qk_term::atom::Atom;
+use qk_term::mfarity::MFArity;
 
 fn parse_u64(i: &str) -> nom::IResult<&str, u64> {
   nom::combinator::map_res(
@@ -85,8 +85,8 @@ fn parse_mfarity(i: &str) -> nom::IResult<&str, EflameValue> {
        parse_u64,
       ))(i) {
     Ok((remaining, (m, _, f, _, arity))) => {
-      let mfarity = MFArityValue::new_a(m, f, arity as u16);
-      let mfav = EflameValue::MFArity(MFArity::Value(mfarity));
+      let mfarity = MFArity::new_a(m, f, arity as u16);
+      let mfav = EflameValue::MFArity(mfarity);
       Ok((remaining, mfav))
     }
     Err(e) =>
