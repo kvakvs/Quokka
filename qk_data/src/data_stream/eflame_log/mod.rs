@@ -1,8 +1,17 @@
+pub mod parser;
+pub mod defs;
+
 use crate::data_stream::t_data_stream::{TDataStream, DataStreamCapability};
 use crate::stream_event::StreamEvent;
 
 struct EflameLogStream {
   filename: String,
+}
+
+impl EflameLogStream {
+  // fn new(path: &str) -> Self {
+  //
+  // }
 }
 
 impl TDataStream for EflameLogStream {

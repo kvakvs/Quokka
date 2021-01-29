@@ -3,8 +3,15 @@ use gtk::*;
 use std::process;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use qk_data::data_stream::eflame_log::parser;
 
 fn main() {
+  parser::parse();
+
+  // start_gui();
+}
+
+fn start_gui() {
   // Initialize GTK before proceeding.
   if gtk::init().is_err() {
     eprintln!("failed to initialize GTK Application");

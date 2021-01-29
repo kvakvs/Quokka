@@ -13,15 +13,6 @@ pub trait TStreamEvent {
   fn duration(&self) -> std::time::Duration;
 }
 
-/// Full Mod:Fun/Arity representation, to store in a lookup table. Use MFArityIndex instead.
-pub struct MFArity {
-  module: Atom,
-  fun: Atom,
-  arity: u16,
-}
-
-pub struct MFArityIndex(usize);
-
 pub enum StreamEvent {
   ExecuteFunctionEvent(ExecuteFunctionTraceEvent),
   SendMessageEvent(SendMessageEvent),

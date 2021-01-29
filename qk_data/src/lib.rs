@@ -5,13 +5,14 @@
 ///
 extern crate qk_term;
 extern crate chrono;
-#[macro_use]
-extern crate bitflags;
+#[macro_use] extern crate bitflags;
+extern crate nom;
 
 pub mod stream_event;
 pub mod data_stream;
 pub mod send_message_event;
 pub mod execute_function_trace_event;
+pub mod mfarity;
 
 #[cfg(test)]
 mod tests {

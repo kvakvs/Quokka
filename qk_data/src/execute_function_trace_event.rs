@@ -1,7 +1,8 @@
 use qk_term::pid::Pid;
 
-use crate::stream_event::{MFArityIndex, TStreamEvent, UtcDatetime};
+use crate::stream_event::{TStreamEvent, UtcDatetime};
 use std::time::Duration;
+use crate::mfarity::MFArityIndex;
 
 /// Represents event of timed function call with the stack trace.
 /// This is usually produced by Eflame-style tracers.

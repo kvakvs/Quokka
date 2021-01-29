@@ -1,1 +1,2 @@
-pub struct Pid(u16, u16, u16);
+#[derive(Debug, PartialOrd, PartialEq)]
+pub struct Pid(pub u16, pub u16, pub u16);
