@@ -3,10 +3,14 @@ use gtk::*;
 use std::process;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use qk_data::data_stream::eflame_log::parser;
+use qk_data::data_stream::eflame_log::{parser, EflameLogStream};
+use qk_data::data_stream::eflame_log::parser::parse_test;
 
 fn main() {
-  parser::parse();
+  parse_test();
+
+  // let ef_log = EflameLogStream::new("eflame_log.txt").unwrap();
+  // println!("Log loaded:\n{:?}", ef_log)
 
   // start_gui();
 }

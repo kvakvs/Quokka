@@ -10,11 +10,11 @@ pub struct MFArityValue {
 
 impl MFArityValue {
   pub fn new(m: &str, f: &str, arity: u16) -> Self {
-    Self {
-      module: Atom::new(m.to_string()),
-      fun: Atom::new(f.to_string()),
-      arity
-    }
+    Self { module: Atom::new(m.to_string()), fun: Atom::new(f.to_string()), arity }
+  }
+
+  pub fn new_a(m: Atom, f: Atom, arity: u16) -> Self {
+    Self { module: m, fun: f, arity }
   }
 }
 
