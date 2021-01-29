@@ -1,19 +1,8 @@
 use qk_term::pid::Pid;
 use nom::IResult;
-use crate::mfarity::{MFArity};
+use crate::mfarity::{MFArity, MFArityValue};
 use nom::combinator::map_res;
-use crate::data_stream::eflame_log::defs::{ExecutionTime, EflameLogLine};
-
-/// Eflame log line looks like
-/// (0.310.0);proc_lib:init_p_do_apply/3;ssh_acceptor:acceptor_loop/6;...;gen:do_call/4;gen:do_call/4;SLEEP 0
-/// Where mfarities are the call stack, SLEEP is if there was sleeping time included, and the
-/// number is microseconds spent in that call stack location.
-#[derive(Debug, PartialEq)]
-pub enum EflameValue {
-  Pid(Pid),
-  MFArity(MFArity),
-  ExecutionTime(ExecutionTime),
-}
+use crate::data_stream::eflame_log::defs::{ExecutionTime, EflameLogLine, EflameValue};
 
 fn parse_u64(i: &str) -> nom::IResult<&str, u64> {
   nom::combinator::map_res(
@@ -21,6 +10,16 @@ fn parse_u64(i: &str) -> nom::IResult<&str, u64> {
     |result_v: Vec<char>| {
       let result_str: String = result_v.into_iter().collect();
       u64::from_str_radix(&result_str, 10)
+    },
+  )(i)
+}
+
+fn parse_u16(i: &str) -> nom::IResult<&str, u16> {
+  nom::combinator::map_res(
+    nom::multi::many1(nom::character::complete::one_of("0123456789")),
+    |result_v: Vec<char>| {
+      let result_str: String = result_v.into_iter().collect();
+      u16::from_str_radix(&result_str, 10)
     },
   )(i)
 }
@@ -38,11 +37,11 @@ fn parse_tail_without_sleep(i: &str) -> nom::IResult<&str, EflameValue> {
 }
 
 fn parse_tail_with_sleep(i: &str) -> nom::IResult<&str, EflameValue> {
-  match nom::combinator::all_consuming(nom::sequence::tuple((
+  match nom::sequence::tuple((
     nom::bytes::complete::tag("SLEEP"),
     nom::character::complete::space1,
     parse_u64,
-  )))(i) {
+  ))(i) {
     Ok((remaining, (_sleep, _, time))) => {
       let et = ExecutionTime { is_sleep: true, time };
       Ok((remaining, EflameValue::ExecutionTime(et)))
@@ -57,15 +56,12 @@ fn parse_tail(i: &str) -> nom::IResult<&str, EflameValue> {
 }
 
 fn parse_numeric_pid(i: &str) -> nom::IResult<&str, EflameValue> {
-  match nom::combinator::all_consuming(nom::sequence::tuple((
-    parse_u64,
-    nom::character::complete::char('.'),
-    parse_u64,
-    nom::character::complete::char('.'),
-    parse_u64,
-  )))(i) {
-    Ok((remaining, (p1, _, p2, _, p3))) => {
-      let p = Pid(p1 as u16, p2 as u16, p3 as u16);
+  match nom::multi::separated_list1(
+    nom::bytes::complete::tag("."),
+    parse_u16,
+  )(i) {
+    Ok((remaining, pid_component)) => {
+      let p = Pid(pid_component[0], pid_component[1], pid_component[2]);
       Ok((remaining, EflameValue::Pid(p)))
     }
     Err(e) =>
@@ -73,84 +69,94 @@ fn parse_numeric_pid(i: &str) -> nom::IResult<&str, EflameValue> {
   }
 }
 
-// TODO: starts not with a capital letter (may be not necessary for Flame logs)
 fn is_atom_character(c: char) -> bool {
   c.is_alphanumeric() || c == '_'
 }
 
 fn parse_atom_body(i: &str) -> nom::IResult<&str, &str> {
+  // TODO: starts not with a capital letter (may be not necessary for Flame logs)
   nom::bytes::complete::take_while1(is_atom_character)(i)
 }
 
+/// Try parse atom as a sequence of letters or a quoted atom in 'single quotes'
 fn parse_atom(i: &str) -> nom::IResult<&str, &str> {
   nom::branch::alt(
     (parse_atom_body,
      nom::sequence::delimited(
-       nom::character::complete::char('{'),
+       nom::bytes::complete::tag("{"),
        parse_atom_body, // TODO: in quotes, escaped characters are allowed
-       nom::character::complete::char('}'))
+       nom::bytes::complete::tag("}"))
     ))(i)
 }
 
 fn parse_mfarity(i: &str) -> nom::IResult<&str, EflameValue> {
-  match nom::combinator::all_consuming(nom::sequence::tuple(
+  match nom::sequence::tuple(
     (parse_atom,
-     nom::character::complete::char(':'),
+     nom::bytes::complete::tag(":"),
      parse_atom,
-     nom::character::complete::char('/'),
+     nom::bytes::complete::tag("/"),
      parse_u64,
-    )))(i) {
+    ))(i) {
     Ok((remaining, (m, _, f, _, arity))) => {
       let mfarity = MFArityValue::new(m, f, arity as u16);
-      Ok((remaining, EflameValue::MFArity(mfarity)))
+      let mfav = EflameValue::MFArity(MFArity::Value(mfarity));
+      Ok((remaining, mfav))
     }
     Err(e) =>
       Err(e),
   }
 }
 
+/// Parse '(' followed by pid1.pid2.pid3 components, terminated by ')'
 fn parse_parenthesized_pid(i: &str) -> nom::IResult<&str, EflameValue> {
-  // Parse '(' followed by pid.pid.pid triple, terminated by ')'
-  nom::sequence::preceded(
-    nom::character::complete::char('('),
-    nom::sequence::terminated(
-      parse_numeric_pid,
-      nom::character::complete::char(')'),
-    ))(i)
+  nom::sequence::delimited(
+    nom::bytes::complete::tag("("),
+    parse_numeric_pid,
+    nom::bytes::complete::tag(")"),
+  )(i)
 }
 
-fn root(i: &str) -> nom::IResult<&str, EflameLogLine> {
-  match nom::combinator::all_consuming(nom::sequence::tuple(
+/// Try consume (pid_in_parentheses) ";" Vec<MFarity>_sep_by(;) ";" tail_piece
+fn parse_eflame_log_line(i: &str) -> nom::IResult<&str, EflameLogLine> {
+  match nom::sequence::tuple(
     (parse_parenthesized_pid,
+     nom::bytes::complete::tag(";"),
      nom::multi::separated_list1(
-       nom::character::complete::char(';'),
+       nom::bytes::complete::tag(";"),
        parse_mfarity),
+     nom::bytes::complete::tag(";"),
      parse_tail,
-    )))(i) {
-    Ok((remaining, (efvPid, efvStack, efvTail))) => {
-      let EflameValue::Pid(pid) = efvPid;
-      let stack = efvStack
-          .into_iter()
-          .map(|efv_mfa| -> MFArityValue {
-            let EflameValue::MFArity(mfa) = efv_mfa;
-            mfa
-          })
-          .collect();
-      let EflameValue::ExecutionTime(tail) = efvTail;
-      let log_line = EflameLogLine { pid, stack, tail };
-      Ok((remaining, log_line))
-    }
+    ))(i) {
+    Ok((remaining,
+         (efvPid, _sep1, efvStack, _sep2, efvTail))) =>
+      {
+        // Extract pieces from a tuple of EflameValues and construct an EflameLogLine
+        let pid = efvPid.get_pid();
+        let stack: Vec<MFArity> = efvStack
+            .into_iter()
+            .map(|efv_mfa| -> MFArity {
+              let mfav = efv_mfa.get_mfarity();
+              mfav
+            })
+            .collect();
+        let tail = efvTail.get_execution_time();
+
+        Ok((remaining, EflameLogLine { pid, stack, tail }))
+      }
     Err(e) =>
       Err(e),
   }
 }
 
 pub fn parse() {
+  let ppid = "(0.310.0)";
+  println!("ppid {:?}", parse_parenthesized_pid(ppid));
+
   let data = "(0.310.0);proc_lib:init_p_do_apply/3;ssh_acceptor:acceptor_loop/6;\
     inet_tcp:accept/2;prim_inet:accept0/3;prim_inet:async_accept/2;\
     prim_inet:ctl_cmd/3;erts_internal:port_control/3;prim_inet:accept0/3;\
     gen:do_call/4;gen:do_call/4;SLEEP 0";
-  println!("{:?}", root(data));
+  println!("{:?}", parse_eflame_log_line(data));
 
   // println!(
   //   "parsing a valid line:\n{:#?}\n",
