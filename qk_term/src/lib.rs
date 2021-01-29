@@ -2,6 +2,8 @@
 /// ---------------------
 /// Represents parsed Erlang terms for inspection.
 ///
+#[macro_use] extern crate lazy_static;
+
 pub mod term;
 pub mod binary;
 pub mod pid;
