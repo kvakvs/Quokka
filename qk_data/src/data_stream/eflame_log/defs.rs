@@ -1,10 +1,21 @@
 use qk_term::pid::Pid;
 use qk_term::mfarity::MFArity;
+use std::fmt::Debug;
+use std::fmt;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub struct ExecutionTime {
   pub is_sleep: bool,
   pub time: u64,
+}
+
+impl Debug for ExecutionTime {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{}({}.{:03}ms)",
+           if self.is_sleep { "Sleep" } else { "Run" },
+           self.time / 1000,
+           self.time % 1000)
+  }
 }
 
 #[derive(Debug, PartialEq)]
