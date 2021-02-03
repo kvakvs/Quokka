@@ -1,16 +1,23 @@
 extern crate gtk;
+extern crate qk_livesystem;
+
 use gtk::*;
 use std::process;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use qk_data::data_stream::eflame_log::{parser, EflameLogStream};
 use qk_data::data_stream::eflame_log::parser::parse_test;
+use qk_livesystem::live_system::LiveSystem;
 
 fn main() {
   // parse_test();
 
   let ef_log = EflameLogStream::new("eflame_log.txt").unwrap();
-  ef_log.lines.iter().for_each(|line| { println!("{:?}", line) })
+  // ef_log.lines.iter().for_each(|line| { println!("{:?}", line) })
+
+  // Representation of the live system as we know it
+  let livesys = LiveSystem::new();
+  println!("{:?}", livesys);
 
   // start_gui();
 }

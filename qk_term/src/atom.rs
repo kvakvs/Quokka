@@ -27,7 +27,7 @@ impl AtomIndex {
       None => {
         drop(r_lock);
         None
-      },
+      }
       Some((_, index)) => {
         let result = Some(*index);
         drop(r_lock);
@@ -77,6 +77,10 @@ impl Debug for Atom {
 }
 
 impl Atom {
+  pub fn new_str(v: &str) -> Self {
+    return Self::new(&v.to_string());
+  }
+
   pub fn new(v: &String) -> Self {
     match AtomIndex::find_index(&v) {
       None => {

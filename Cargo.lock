@@ -777,6 +777,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "qk_livesystem"
+version = "0.1.0"
+dependencies = [
+ "qk_term",
+]
+
+[[package]]
 name = "qk_term"
 version = "0.1.0"
 dependencies = [
@@ -797,6 +804,7 @@ dependencies = [
  "once_cell",
  "pangocairo",
  "qk_data",
+ "qk_livesystem",
  "qk_term",
 ]
 
