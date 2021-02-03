@@ -15,8 +15,11 @@ specific moment in the past and which events have led to it.
 NOTE: This does not exist yet. Work started on the data model and displaying trace data and
 time-aggregated trace data (flame graph output).
 
-[//]: <> (## The idea: AGENTS)
+## Current Status
 
-[//]: <> (NOTE: These do not exist yet.)
-
-[//]: <> (The agent would be injectable code modules injected by Quokka into a running Erlang cluster or installed by the user, which are able to collect the vital data for visualisation. Example: node resource state, running processes and OTP apps, collect trace events, logs, etc.)
+- [x] Importing Eflame logs (contains pieces of code structure and time spent in functions)
+- [x] Modeling BEAM cluster with 1 node
+- [x] Using Eflame log as a data source to populate the BEAM cluster info
+- [ ] Code structure view
+- [ ] Cluster view
+- [ ] Node view
