@@ -12,7 +12,7 @@ use qk_livesystem::beam_cluster::BeamCluster;
 fn main() {
   // parse_test();
 
-  let ef_log = std::boxed::Box::new(EflameLogStream::new("eflame_log.txt").unwrap());
+  let ef_log = std::boxed::Box::new(EflameLogStream::new("eflame_log2.txt").unwrap());
   ef_log.lines.iter().for_each(|line| { println!("{:?}", line) });
 
   // Representation of the live system as we know it

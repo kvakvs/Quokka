@@ -9,6 +9,7 @@ pub mod binary;
 pub mod pid;
 pub mod atom;
 pub mod mfarity;
+pub mod funarity;
 
 // #[cfg(test)]
 // mod tests {

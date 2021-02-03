@@ -53,6 +53,7 @@ impl TDataStream for EflameLogStream {
     unimplemented!() // should not be called, because we are "HasEntireDataReady"
   }
 
+  /// Convert the loaded events in EflameLogStream into a vec of StreamEvents
   fn get_all(&self) -> Vec<StreamEvent> {
     self.lines
         .iter()
