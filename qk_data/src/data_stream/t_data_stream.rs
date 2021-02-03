@@ -2,7 +2,7 @@ use crate::stream_event::StreamEvent;
 
 bitflags! {
   /// The qualities of data the datastream can provide.
-  pub struct DataStreamCapability: u32 {
+  pub struct StreamCaps: u32 {
     /// Can the data be used for aggregate reports? Produced by Eflame tracing logs.
     /// Not usable for live visualisation.
     const AGGREGATE_EXECUTION_TIME = 0b0001;
@@ -23,7 +23,7 @@ bitflags! {
 /// For example this can be a trace file reader, or a tracing agent installed on the live system.
 pub trait TDataStream {
   /// Describe the qualities of the data, this stream can provide
-  fn get_capabilities() -> Vec<DataStreamCapability>;
+  fn get_capabilities(&self) -> StreamCaps;
 
   /// Read next event if exists. The engine will interpret it and update the picture accordingly.
   /// This will not be called if get_capabilities() has HasEntireDataReady

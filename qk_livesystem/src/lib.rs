@@ -4,6 +4,7 @@ pub mod beam_process;
 pub mod code_server;
 
 extern crate qk_term;
+extern crate qk_data;
 
 // #[cfg(test)]
 // mod tests {

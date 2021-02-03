@@ -16,7 +16,8 @@ fn main() {
   // ef_log.lines.iter().for_each(|line| { println!("{:?}", line) })
 
   // Representation of the live system as we know it
-  let livesys = LiveSystem::new();
+  let mut livesys = LiveSystem::new();
+  livesys.load_data_stream(std::boxed::Box::new(ef_log));
   println!("{:?}", livesys);
 
   // start_gui();

@@ -2,7 +2,7 @@ pub mod parser;
 pub mod defs;
 pub mod errors;
 
-use crate::data_stream::t_data_stream::{TDataStream, DataStreamCapability};
+use crate::data_stream::t_data_stream::{TDataStream, StreamCaps};
 use crate::stream_event::StreamEvent;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
@@ -43,8 +43,8 @@ impl EflameLogStream {
 }
 
 impl TDataStream for EflameLogStream {
-  fn get_capabilities() -> Vec<DataStreamCapability> {
-    vec![DataStreamCapability::HAS_ENTIRE_DATA_READY, ]
+  fn get_capabilities(&self) -> StreamCaps {
+    StreamCaps::HAS_ENTIRE_DATA_READY
   }
 
   fn get_next(&mut self) -> Option<StreamEvent> {

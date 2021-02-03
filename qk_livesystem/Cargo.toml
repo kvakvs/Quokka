@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 qk_term = { path = "../qk_term" }
+qk_data = { path = "../qk_data" }
