@@ -1,20 +1,18 @@
 use crate::beam_node::BeamNode;
 use qk_term::atom::Atom;
-use crate::code_server::BeamCodeServer;
 use qk_data::data_stream::t_data_stream::{TDataStream, StreamCaps};
+use qk_data::stream_event::StreamEvent;
 
 #[derive(Debug)]
-pub struct LiveSystem {
+pub struct BeamCluster {
   nodes: Vec<BeamNode>,
-  code: Box<BeamCodeServer>,
 }
 
-impl LiveSystem {
+impl BeamCluster {
   pub fn new() -> Self {
     // Default start with one unconnected node
     Self {
       nodes: vec![BeamNode::new(Atom::new_str("nonode@nohost"), false)],
-      code: Box::new(BeamCodeServer::new())
     }
   }
 
@@ -27,5 +25,22 @@ impl LiveSystem {
       panic!("Must have all data ready to load_data_stream()");
     }
     println!("Loading from data stream...");
+    assert_eq!(self.nodes.len(), 1, "Eflame logs can only be loaded into a single node");
+
+    let load_event = |evt: StreamEvent| {
+      match evt {
+        StreamEvent::ExecuteFunctionEvent(ef) => {
+          ef.stack.into_iter().for_each(|mfa| {
+            // assume that this is loaded in single node mode only
+            // println!("Learned {:?}", mfa);
+            self.nodes[0].code.learned_new_mfa(&mfa)
+          })
+        }
+        e => {
+          panic!("Don't know how to import {:?}", e)
+        }
+      }
+    };
+    input.get_all().into_iter().for_each(load_event);
   }
 }

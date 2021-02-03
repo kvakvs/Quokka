@@ -31,5 +31,5 @@ pub trait TDataStream {
 
   /// Read all events.
   /// This will be called if get_capabilities() has HasEntireDataReady
-  fn get_all(&mut self) -> Vec<StreamEvent>;
+  fn get_all(&self) -> Vec<StreamEvent>;
 }

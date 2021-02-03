@@ -3,11 +3,11 @@ use std::fmt::Debug;
 use std::fmt;
 
 /// Full Mod:Fun/Arity representation, to store in a lookup table. Use MFArityIndex instead.
-#[derive(PartialOrd, PartialEq, Clone)]
+#[derive(PartialOrd, PartialEq, Clone, Copy)]
 pub struct MFArity {
-  module: Atom,
-  fun: Atom,
-  arity: u16,
+  pub module: Atom,
+  pub fun: Atom,
+  pub arity: u16,
 }
 
 impl Debug for MFArity {

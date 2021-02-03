@@ -3,7 +3,7 @@ use qk_term::mfarity::MFArity;
 use std::fmt::Debug;
 use std::fmt;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Copy)]
 pub struct ExecutionTime {
   pub is_sleep: bool,
   pub time: u64,

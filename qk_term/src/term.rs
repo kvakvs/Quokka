@@ -2,6 +2,7 @@ use crate::binary::Binary;
 use crate::pid::Pid;
 use crate::atom::Atom;
 
+#[derive(Debug)]
 pub enum Term {
   Int(isize),
   BigInt,

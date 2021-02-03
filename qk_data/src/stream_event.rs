@@ -13,7 +13,11 @@ pub trait TStreamEvent {
   fn duration(&self) -> std::time::Duration;
 }
 
+#[derive(Debug)]
 pub enum StreamEvent {
+  // Produced by Eflame, only stack traces and execution times
   ExecuteFunctionEvent(ExecuteFunctionTraceEvent),
+
+  // Generic BEAM VM events revealing the changes to the system structure
   SendMessageEvent(SendMessageEvent),
 }

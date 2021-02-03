@@ -7,14 +7,21 @@ use qk_term::mfarity::MFArity;
 /// Represents event of timed function call with the stack trace.
 /// This is usually produced by Eflame-style tracers.
 /// Trace-style events might have no start/end time, just the accumulated nanoseconds.
+#[derive(Debug)]
 pub struct ExecuteFunctionTraceEvent {
-  pid: Pid,
+  pub pid: Pid,
 
   /// Call stack of indices into the lookup map of MFArity objects
-  stack: Vec<MFArity>,
+  pub stack: Vec<MFArity>,
 
   /// Microseconds spent in this function
-  time_duration: std::time::Duration,
+  pub time_duration: std::time::Duration,
+}
+
+impl ExecuteFunctionTraceEvent {
+  pub fn new(pid: Pid, stack: Vec<MFArity>, time_duration: Duration) -> Self {
+    ExecuteFunctionTraceEvent { pid, stack, time_duration }
+  }
 }
 
 impl TStreamEvent for ExecuteFunctionTraceEvent {

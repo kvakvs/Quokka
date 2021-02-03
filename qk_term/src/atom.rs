@@ -64,7 +64,7 @@ impl AtomIndex {
   }
 }
 
-#[derive(PartialOrd, PartialEq, Clone)]
+#[derive(PartialOrd, Hash, Eq, PartialEq, Clone, Copy)]
 pub struct Atom(usize);
 
 impl Debug for Atom {

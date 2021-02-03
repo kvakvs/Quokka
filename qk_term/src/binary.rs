@@ -1,7 +1,8 @@
+#[derive(Debug)]
 pub struct Binary {
-    pub bytes: Vec<u8>,
-    /// Value other than 0 represents a binary with last byte incomplete.
-    pub unused_bits: u8,
+  pub bytes: Vec<u8>,
+  /// Value other than 0 represents a binary with last byte incomplete.
+  pub unused_bits: u8,
 }
 
 impl Binary {
