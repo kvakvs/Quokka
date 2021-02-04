@@ -8,7 +8,7 @@ use crate::window::main::content::QkMainWindowContent;
 use crate::window::main::QkMainWindowHeader;
 
 pub struct QkApp {
-  pub window: gtk::Window,
+  pub window: gtk::ApplicationWindow,
   pub header: QkMainWindowHeader,
   pub content: QkMainWindowContent,
   pub app_state: Arc<RwLock<QkAppState>>,
@@ -17,11 +17,13 @@ pub struct QkApp {
 impl QkApp {
   pub fn new(gtk_app: &gtk::Application, app_state: Arc<RwLock<QkAppState>>) -> QkApp {
     // Create a new top level window.
-    let window = gtk::Window::new(gtk::WindowType::Toplevel);
+    // let window = gtk::Window::new(gtk::WindowType::Toplevel);
+    let window = gtk::ApplicationWindow::new(gtk_app);
+
     // Create a the headerbar and it's associated content.
     let header = QkMainWindowHeader::new();
     // Contains the content within the window.
-    let content = QkMainWindowContent::new(window.clone());
+    let content = QkMainWindowContent::new(&window);
 
     // Set the headerbar as the title bar widget.
     window.set_titlebar(Some(&header.container));

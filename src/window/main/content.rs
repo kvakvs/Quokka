@@ -8,7 +8,7 @@ pub struct QkMainWindowContent {
 }
 
 impl QkMainWindowContent {
-  pub fn new(window: gtk::Window) -> QkMainWindowContent {
+  pub fn new(window: &gtk::ApplicationWindow) -> QkMainWindowContent {
     // Create a vertical box to store all of it's inner children vertically.
     let container = gtk::Box::new(gtk::Orientation::Vertical, 0);
 

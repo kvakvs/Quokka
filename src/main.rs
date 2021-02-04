@@ -34,6 +34,5 @@ fn main() {
   });
 
   gtk_application.run(&vec![]);
-  // gtk_application.run(&env::args().collect::<Vec<_>>());
 }
 
