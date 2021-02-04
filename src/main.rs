@@ -11,6 +11,7 @@ use gio::prelude::*;
 // use std::env;
 
 mod window;
+mod my_types;
 
 fn main() {
   // parse_test();
@@ -26,8 +27,7 @@ fn main() {
   let gtk_application = gtk::Application::new(
     "se.clau.quokka",
     gio::APPLICATION_FLAGS_NONE,
-  )
-      .expect("Initialization failed...");
+  ).expect("Gtk Application initialization failed...");
 
   gtk_application.connect_activate(|app| {
     window::main::start_gui(app);
