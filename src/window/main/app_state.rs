@@ -10,8 +10,6 @@ pub enum QkViewMode {
 
 /// Stores application global state: That is current opened project, view mode etc.
 pub struct QkAppState {
-  lock: RwLock<()>,
-
   // TODO: this below belongs to the current project, when projects are introduced
   view_mode: QkViewMode,
 }
@@ -19,18 +17,17 @@ pub struct QkAppState {
 impl QkAppState {
   pub fn new() -> Self {
     Self {
-      lock: RwLock::new(()),
       view_mode: QkViewMode::Cluster,
     }
   }
 
-  pub fn set_view_mode(&mut self, view_mode: QkViewMode) {
-    let lock = self.lock.write().unwrap();
+  pub fn set_view_mode(this_rw: &RwLock<QkAppState>, view_mode: QkViewMode) {
+    let mut this = this_rw.write().unwrap();
 
-    self.view_mode = view_mode;
+    this.view_mode = view_mode;
     // TODO: Redraw the window
 
-    drop(lock);
+    drop(this);
   }
 
   // pub fn get_health(&self) -> usize { self.0.load(Ordering::SeqCst) }

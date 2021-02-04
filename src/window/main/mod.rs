@@ -1,5 +1,5 @@
 use std::process;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use gtk::*;
@@ -20,10 +20,10 @@ pub fn start_gui() {
 
   // Set the initial state of our health component. We use an `Arc` so that we can share
   // this value across multiple programmable closures.
-  let mut app_state = Arc::new(std::boxed::Box::new(QkAppState::new()));
+  let mut app_state = Arc::new(RwLock::new(QkAppState::new()));
 
   // Initialize the UI's initial state.
-  let app = App::new(app_state);
+  let app = App::new(app_state.clone());
 
   {
     let st = app_state.clone();
@@ -31,8 +31,7 @@ pub fn start_gui() {
       // let new_health = state.subtract(1);
       // message.set_label("fgsfds");
       // info.set_label(new_health.to_string().as_str());
-      let st1 = st.as_ref().as_mut();
-      st1.set_view_mode(QkViewMode::Cluster);
+      QkAppState::set_view_mode(&st, QkViewMode::Cluster);
     });
   }
 
@@ -47,7 +46,7 @@ pub struct App {
   pub window: Window,
   pub header: Header,
   pub content: Content,
-  pub app_state: Arc<std::boxed::Box<QkAppState>>,
+  pub app_state: Arc<RwLock<QkAppState>>,
 }
 
 pub struct Header {
@@ -95,7 +94,7 @@ impl Content {
 }
 
 impl App {
-  fn new(app_state: Arc<std::boxed::Box<QkAppState>>) -> App {
+  fn new(app_state: Arc<RwLock<QkAppState>>) -> App {
     // Create a new top level window.
     let window = Window::new(WindowType::Toplevel);
     // Create a the headerbar and it's associated content.

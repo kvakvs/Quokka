@@ -131,6 +131,7 @@ dependencies = [
 name = "qk_livesystem"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "qk_data",
  "qk_term",
 ]
