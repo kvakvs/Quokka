@@ -1,4 +1,3 @@
-use qk_term::atom::Atom;
 use std::fmt::Debug;
 use qk_term::funarity::FunArity;
 use std::fmt;

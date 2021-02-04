@@ -163,7 +163,7 @@ fn parse_simple_atom(i: &str) -> nom::IResult<&str, Atom> {
     ),
     |s: (char, &str)| {
       let value = s.0.to_string() + s.1;
-      Ok::<Atom, nom::error::Error<&str>>((Atom::new(&value)))
+      Ok::<Atom, nom::error::Error<&str>>(Atom::new(&value))
     },
   )(i)
 }

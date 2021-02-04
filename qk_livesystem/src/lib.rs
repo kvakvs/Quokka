@@ -5,6 +5,11 @@ pub mod code_server;
 
 extern crate qk_term;
 extern crate qk_data;
+extern crate chrono;
+
+use chrono::Utc;
+
+pub type Timestamp = chrono::DateTime<Utc>;
 
 // #[cfg(test)]
 // mod tests {

@@ -1,11 +1,7 @@
 pub mod atom;
 
 use qk_term::pid::Pid;
-use nom::IResult;
-use nom::combinator::map_res;
 use crate::data_stream::eflame_log::defs::{ExecutionTime, EflameLogLine, EflameValue};
-use nom::error::Error;
-use qk_term::atom::Atom;
 use qk_term::mfarity::MFArity;
 
 fn parse_u64(i: &str) -> nom::IResult<&str, u64> {
@@ -114,18 +110,18 @@ pub(crate) fn parse_eflame_log_line(i: &str) -> nom::IResult<&str, EflameLogLine
      parse_tail,
     ))(i) {
     Ok((remaining,
-         (efvPid, _sep1, efvStack, efvTail))) =>
+         (efv_pid, _sep1, efv_stack, efv_tail))) =>
       {
         // Extract pieces from a tuple of EflameValues and construct an EflameLogLine
-        let pid = efvPid.get_pid();
-        let stack: Vec<MFArity> = efvStack
+        let pid = efv_pid.get_pid();
+        let stack: Vec<MFArity> = efv_stack
             .into_iter()
             .map(|efv_mfa| -> MFArity {
               let mfav = efv_mfa.get_mfarity();
               mfav
             })
             .collect();
-        let tail = efvTail.get_execution_time();
+        let tail = efv_tail.get_execution_time();
 
         Ok((remaining, EflameLogLine { pid, stack, tail }))
       }

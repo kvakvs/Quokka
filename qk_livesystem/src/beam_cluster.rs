@@ -30,10 +30,11 @@ impl BeamCluster {
     let load_event = |evt: StreamEvent| {
       match evt {
         StreamEvent::ExecuteFunctionEvent(ef) => {
-          ef.stack.into_iter().for_each(|mfa| {
+          ef.stack.into_iter().for_each(|ref mfa| {
             // assume that this is loaded in single node mode only
             // println!("Learned {:?}", mfa);
-            self.nodes[0].code.learned_new_mfa(&mfa)
+            self.nodes[0].code.learned_new_mfa(mfa);
+            self.nodes[0].learned_new_pid(ef.pid, None)
           })
         }
         e => {

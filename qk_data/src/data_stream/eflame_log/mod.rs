@@ -5,11 +5,10 @@ pub mod errors;
 use crate::data_stream::t_data_stream::{TDataStream, StreamCaps};
 use crate::stream_event::StreamEvent;
 use std::fs::File;
-use std::io::{self, prelude::*, BufReader};
+use std::io::{prelude::*, BufReader};
 use crate::data_stream::eflame_log::defs::EflameLogLine;
 use crate::data_stream::eflame_log::parser::parse_eflame_log_line;
 use crate::data_stream::eflame_log::errors::EflameError;
-use crate::stream_event::StreamEvent::ExecuteFunctionEvent;
 use crate::execute_function_trace_event::ExecuteFunctionTraceEvent;
 
 #[derive(Debug)]

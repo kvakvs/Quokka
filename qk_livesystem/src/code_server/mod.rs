@@ -34,7 +34,7 @@ impl BeamCodeServer {
   /// Inform the Code Server, that some MFA exists in the code (been recently used or learned from
   /// some trace logs). This will be displayed in the code map.
   pub fn learned_new_mfa(&mut self, mfa: &MFArity) {
-    let mut m = self.get_or_create_module(mfa.module);
+    let m = self.get_or_create_module(mfa.module);
     m.learned_new_function(&mfa);
   }
 }

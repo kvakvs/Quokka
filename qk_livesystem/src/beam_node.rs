@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use qk_term::pid::Pid;
 use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
+use crate::Timestamp;
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -29,5 +30,10 @@ impl BeamNode {
       connected_to_all: false,
       processes: HashMap::new(),
     }
+  }
+
+  pub fn learned_new_pid(&mut self, pid: Pid, when: Option<Timestamp>) {
+    assert_eq!(when, None);
+    self.processes.insert(pid, BeamProcess::new(pid, when));
   }
 }

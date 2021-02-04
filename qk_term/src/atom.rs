@@ -1,10 +1,7 @@
 use std::collections::{HashMap};
-use std::sync::{Arc, Mutex, RwLock};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::ops::Index;
+use std::sync::{RwLock};
 use std::fmt::Debug;
 use std::fmt;
-use std::io::Read;
 
 struct AtomIndex {
   pub next_index: usize,
