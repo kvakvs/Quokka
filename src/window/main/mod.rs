@@ -10,7 +10,6 @@ use std::f64::consts::PI;
 use cairo::{FontSlant, FontWeight, Context};
 use gtk::prelude::*;
 use gio::prelude::*;
-use gtk::{Inhibit, Window, Button, Orientation, Label, WindowType, main_quit, DrawingArea, ButtonExt, WidgetExt, WindowExt, ContainerExt, HeaderBar};
 
 pub mod app_state;
 
@@ -129,32 +128,32 @@ fn create_drawable(application: &gtk::Application) {
 }
 
 pub struct App {
-  pub window: Window,
-  pub header: Header,
-  pub content: Content,
+  pub window: gtk::Window,
+  pub header: QkMainWindowHeader,
+  pub content: QkMainWindowContent,
   pub app_state: Arc<RwLock<QkAppState>>,
 }
 
-pub struct Header {
-  pub container: HeaderBar,
-  pub btn_cluster: Button, // Cluster view
+pub struct QkMainWindowHeader {
+  pub container: gtk::HeaderBar,
+  pub btn_cluster: gtk::Button, // Cluster view
 }
 
-pub struct Content {
+pub struct QkMainWindowContent {
   pub container: gtk::Box,
-  // pub health: Label,
-  // pub message: Label,
+  // pub health: gtk::Label,
+  // pub message: gtk::Label,
 }
 
-impl Content {
-  fn new() -> Content {
+impl QkMainWindowContent {
+  fn new() -> QkMainWindowContent {
     // Create a vertical box to store all of it's inner children vertically.
-    let container = gtk::Box::new(Orientation::Vertical, 0);
+    let container = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
     // The health info will be contained within a horizontal box within the vertical box.
-    // let health_info = Box::new(Orientation::Horizontal, 0);
-    // let health_label = Label::new(Some("Current Health:"));
-    // let health = Label::new(Some(health.get_health().to_string().as_str()));
+    // let health_info = Box::new(gtk::Orientation::Horizontal, 0);
+    // let health_label = gtk::Label::new(Some("Current Health:"));
+    // let health = gtk::Label::new(Some(health.get_health().to_string().as_str()));
 
     // Set the horizontal alignments of each of our objects.
     // health_info.set_halign(Align::Center);
@@ -168,25 +167,25 @@ impl Content {
 
     // Create a message label that will later be modified by the application, upon
     // performing a hit or heal action.
-    let message = Label::new(Some("Hello"));
+    let message = gtk::Label::new(Some("Hello"));
 
     // Add everything to our vertical box
     // container.pack_start(&health_info, true, false, 0);
-    // container.pack_start(&Separator::new(Orientation::Horizontal), false, false, 0);
+    // container.pack_start(&Separator::new(gtk::Orientation::Horizontal), false, false, 0);
     // container.pack_start(&message, true, false, 0);
 
-    Content { container }
+    QkMainWindowContent { container }
   }
 }
 
 impl App {
   fn new(app_state: Arc<RwLock<QkAppState>>) -> App {
     // Create a new top level window.
-    let window = Window::new(WindowType::Toplevel);
+    let window = gtk::Window::new(gtk::WindowType::Toplevel);
     // Create a the headerbar and it's associated content.
-    let header = Header::new();
+    let header = QkMainWindowHeader::new();
     // Contains the content within the window.
-    let content = Content::new();
+    let content = QkMainWindowContent::new();
 
     // Set the headerbar as the title bar widget.
     window.set_titlebar(Some(&header.container));
@@ -195,14 +194,14 @@ impl App {
     // Set the window manager class.
     window.set_wmclass("app-name", "App name");
     // The icon the app will display.
-    Window::set_default_icon_name("iconname");
+    gtk::Window::set_default_icon_name("iconname");
     // Add the content box into the window.
     window.add(&content.container);
 
     // Programs what to do when the exit button is used.
     window.connect_delete_event(move |_, _| {
-      main_quit();
-      Inhibit(false)
+      gtk::main_quit();
+      gtk::Inhibit(false)
     });
 
     // Return our main application state
@@ -215,20 +214,20 @@ impl App {
   }
 }
 
-impl Header {
-  fn new() -> Header {
-    let (container, btn_cluster) = Header::setup_header_bar();
+impl QkMainWindowHeader {
+  fn new() -> QkMainWindowHeader {
+    let (container, btn_cluster) = QkMainWindowHeader::setup_header_bar();
 
     // Returns the header and all of it's state
-    Header {
+    QkMainWindowHeader {
       container,
       btn_cluster,
     }
   }
 
   /// Creates the main header bar container widget.
-  fn setup_header_bar() -> (HeaderBar, Button) {
-    let container = HeaderBar::new();
+  fn setup_header_bar() -> (gtk::HeaderBar, gtk::Button) {
+    let container = gtk::HeaderBar::new();
 
     // Sets the text to display in the title section of the header bar.
     container.set_title(Some("Quokka Observer"));
@@ -236,7 +235,7 @@ impl Header {
     container.set_show_close_button(true);
 
     // Create the hit and heal buttons.
-    let btn_cluster = Button::new_with_label("Cluster View");
+    let btn_cluster = gtk::Button::new_with_label("Cluster View");
 
     // Add the corresponding style classes to those buttons.
     // btn_cluster.get_style_context().map(|c| c.add_class("destructive-action"));
@@ -249,10 +248,10 @@ impl Header {
 
 pub fn drawable<F>(application: &gtk::Application, width: i32, height: i32, draw_fn: F)
   where
-      F: Fn(&DrawingArea, &Context) -> Inhibit + 'static,
+      F: Fn(&gtk::DrawingArea, &Context) -> Inhibit + 'static,
 {
   let window = gtk::ApplicationWindow::new(application);
-  let drawing_area = std::boxed::Box::new(DrawingArea::new)();
+  let drawing_area = std::boxed::Box::new(gtk::DrawingArea::new)();
 
   drawing_area.connect_draw(draw_fn);
 
