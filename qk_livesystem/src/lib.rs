@@ -1,6 +1,7 @@
 extern crate qk_term;
 extern crate qk_data;
 extern crate chrono;
+extern crate cairo;
 
 pub mod beam_cluster;
 pub mod beam_node;

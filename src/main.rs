@@ -15,8 +15,8 @@ mod my_types;
 
 fn main() {
   let gtk_application = gtk::Application::new(
-    "se.clau.quokka",
-    gio::APPLICATION_FLAGS_NONE,
+    Option::from("se.clau.quokka"),
+    gio::ApplicationFlags::FLAGS_NONE,
   ).expect("Gtk Application initialization failed...");
 
   gtk_application.connect_activate(|app| {

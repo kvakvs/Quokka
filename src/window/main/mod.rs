@@ -155,7 +155,8 @@ impl QkMainWindowHeader {
     container.set_show_close_button(true);
 
     // Create the hit and heal buttons.
-    let btn_cluster = gtk::Button::new_with_label("Cluster View");
+    let btn_cluster = gtk::Button::new();
+    btn_cluster.set_label("Cluster View");
 
     // Add the corresponding style classes to those buttons.
     // btn_cluster.get_style_context().map(|c| c.add_class("destructive-action"));

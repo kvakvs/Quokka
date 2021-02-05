@@ -1,10 +1,16 @@
-use qk_term::atom::Atom;
 use std::collections::HashMap;
+
+use qk_term::atom::Atom;
 use qk_term::pid::Pid;
+
 use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
 use crate::Timestamp;
-use crate::ui::{TLayout, Layout, Sizef, Pointf};
+use crate::ui::layout::{Layout, TLayout};
+use crate::ui::point::Pointf;
+use crate::ui::size::Sizef;
+use crate::ui::draw::TDrawable;
+use cairo::Context;
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -40,12 +46,36 @@ impl BeamNode {
       connected_to: Vec::new(),
       connected_to_all: false,
       processes: HashMap::new(),
-      layout: Layout::new(Pointf::new(10.0, 20.0)),
+      layout: Layout::new(Pointf::new(40.0, 30.0)),
     }
   }
 
   pub fn learned_new_pid(&mut self, pid: Pid, when: Option<Timestamp>) {
     assert_eq!(when, None);
     self.processes.insert(pid, BeamProcess::new(pid, when));
+  }
+}
+
+impl TDrawable for BeamNode {
+  fn draw(&self, cr: &Context) {
+    let sz = self.layout.size.unwrap_or(Sizef::new(20.0, 20.0));
+    cr.set_source_rgb(0.3, 0.3, 0.3);
+
+    let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
+                             self.layout.pos.y - 0.5 * sz.y);
+
+    cr.rectangle(origin.x, origin.y, sz.x, sz.y);
+    cr.stroke();
+
+    const FONT_HEIGHT: f64 = 12.0;
+    cr.set_font_size(FONT_HEIGHT);
+
+    // Draw a text node name label under the box
+    let label = self.name.get_str().unwrap_or("?".to_string());
+    let label_ext = cr.text_extents(&label);
+
+    cr.move_to(origin.x - label_ext.width * 0.5,
+               origin.y + sz.y + label_ext.height);
+    cr.show_text(&label);
   }
 }

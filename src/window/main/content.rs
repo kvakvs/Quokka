@@ -1,9 +1,13 @@
+use std::ops::Deref;
+use std::sync::{Arc, RwLock};
+
 use gtk::BoxExt;
 use gtk::prelude::*;
-use std::sync::{Arc, RwLock};
+use qk_livesystem::ui::size::Sizef;
+use qk_livesystem::ui::layout::TLayout;
+use qk_livesystem::ui::draw::TDrawable;
+
 use crate::window::main::app_state::{QkAppState, QkViewMode};
-use std::ops::Deref;
-use qk_livesystem::ui::{TLayout, Sizef};
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -86,9 +90,7 @@ impl QkMainWindowContent {
 
     // TODO: Layout component for nodes
     app_state.cluster.nodes.iter().for_each(|node| {
-      let sz = node.layout_size().unwrap_or(Sizef::new(20.0, 20.0));
-      cr.rectangle(node.layout_pos().x, node.layout_pos().y,
-                   sz.x, sz.y);
+      node.draw(cr);
     })
   }
 }

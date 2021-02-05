@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 
-use gtk::{ContainerExt, WidgetExt, WindowExt};
+use gtk::{ContainerExt, WidgetExt, GtkWindowExt};
 
 use crate::window::main;
 use crate::window::main::app_state::QkAppState;

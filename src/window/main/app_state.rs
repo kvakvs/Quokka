@@ -4,7 +4,7 @@ use qk_term::atom::Atom;
 use std::ops::DerefMut;
 use qk_livesystem::beam_cluster::BeamCluster;
 use qk_data::data_stream::eflame_log::EflameLogStream;
-use qk_livesystem::ui::Pointf;
+use qk_livesystem::ui::point::Pointf;
 
 pub enum QkViewMode {
   Cluster,
