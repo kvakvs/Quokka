@@ -5,7 +5,7 @@ use qk_data::stream_event::StreamEvent;
 
 #[derive(Debug)]
 pub struct BeamCluster {
-  nodes: Vec<BeamNode>,
+  pub nodes: Vec<BeamNode>,
 }
 
 impl BeamCluster {

@@ -1,5 +1,9 @@
 use gtk::BoxExt;
 use gtk::prelude::*;
+use std::sync::{Arc, RwLock};
+use crate::window::main::app_state::{QkAppState, QkViewMode};
+use std::ops::Deref;
+use qk_livesystem::ui::{TLayout, Sizef};
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -8,7 +12,8 @@ pub struct QkMainWindowContent {
 }
 
 impl QkMainWindowContent {
-  pub fn new(window: &gtk::ApplicationWindow) -> QkMainWindowContent {
+  pub fn new(window: &gtk::ApplicationWindow,
+             app_state: &Arc<RwLock<QkAppState>>) -> QkMainWindowContent {
     // Create a vertical box to store all of it's inner children vertically.
     let container = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
@@ -31,9 +36,15 @@ impl QkMainWindowContent {
     // performing a hit or heal action.
     // let message = gtk::Label::new(Some("Now looking at: Cluster view"));
     let drawing_area = std::boxed::Box::new(gtk::DrawingArea::new)();
+    {
+      let st = app_state.clone();
+      drawing_area.connect_draw(move |da, ctx| {
+        Self::drawing_area_draw(da, ctx, &st)
+      });
+    }
+
+    // container.pack_start(&drawing_area, true, false, 0);
     window.add(&drawing_area);
-    drawing_area.connect_draw(Self::drawing_area_draw);
-    container.pack_start(&drawing_area, true, false, 0);
 
     // Add everything to our vertical box
     // container.pack_start(&health_info, true, false, 0);
@@ -43,17 +54,41 @@ impl QkMainWindowContent {
     QkMainWindowContent { container }
   }
 
-  fn drawing_area_draw(_da: &gtk::DrawingArea, cr: &cairo::Context) -> gtk::Inhibit {
-    cr.scale(500f64, 500f64);
+  fn drawing_area_draw(da: &gtk::DrawingArea,
+                       cr: &cairo::Context,
+                       app_state: &RwLock<QkAppState>) -> gtk::Inhibit {
+    let app_lock = app_state.read().unwrap();
+    match app_lock.view_mode {
+      QkViewMode::Cluster => {
+        Self::drawing_area_draw_cluster(da, cr, app_lock.deref())
+      }
+      QkViewMode::Node(pid) => {
+        // Self::drawing_area_draw_node(pid, da, cr, app_lock.deref())
+        panic!("Can't draw node view yet")
+      }
+    }
+    drop(app_lock);
+    gtk::Inhibit(false)
+  }
+
+  fn drawing_area_draw_cluster(da: &gtk::DrawingArea,
+                               cr: &cairo::Context,
+                               app_state: &QkAppState) {
+    cr.scale(1.0, 1.0);
 
     cr.select_font_face("Sans",
                         cairo::FontSlant::Normal,
                         cairo::FontWeight::Normal);
-    cr.set_font_size(0.35);
+    cr.set_font_size(12.0);
 
-    cr.move_to(0.04, 0.53);
-    cr.show_text("Hello");
+    cr.move_to(8.0, 20.0);
+    cr.show_text(&format!("Cluster view, {} nodes", app_state.cluster.nodes.len()));
 
-    gtk::Inhibit(false)
+    // TODO: Layout component for nodes
+    app_state.cluster.nodes.iter().for_each(|node| {
+      let sz = node.layout_size().unwrap_or(Sizef::new(20.0, 20.0));
+      cr.rectangle(node.layout_pos().x, node.layout_pos().y,
+                   sz.x, sz.y);
+    })
   }
 }

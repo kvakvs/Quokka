@@ -23,7 +23,7 @@ impl QkApp {
     // Create a the headerbar and it's associated content.
     let header = QkMainWindowHeader::new();
     // Contains the content within the window.
-    let content = QkMainWindowContent::new(&window);
+    let content = QkMainWindowContent::new(&window, &app_state);
 
     // Set the headerbar as the title bar widget.
     window.set_titlebar(Some(&header.container));
@@ -34,7 +34,7 @@ impl QkApp {
     // The icon the app will display.
     gtk::Window::set_default_icon_name("iconname");
     // Add the content box into the window.
-    window.add(&content.container);
+    // window.add(&content.container);
 
     // Programs what to do when the exit button is used.
     window.connect_delete_event(move |_, _| {

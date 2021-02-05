@@ -4,6 +4,7 @@ use qk_term::pid::Pid;
 use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
 use crate::Timestamp;
+use crate::ui::{TLayout, Layout, Sizef, Pointf};
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -13,11 +14,21 @@ pub struct BeamNode {
   connected_to: Vec<Atom>,
   connected_to_all: bool,
 
+  // UI section: positioning, classification, tags, colors, grouping
+  layout: Layout,
+
   // Static (more or less static) resources, such as code structure
   pub(crate) code: Box<BeamCodeServer>,
 
   // Processes
   processes: HashMap<Pid, BeamProcess>,
+}
+
+impl TLayout for BeamNode {
+  fn layout_pos(&self) -> &Pointf { &self.layout.pos }
+  fn layout_pos_mut(&mut self) -> &mut Pointf { &mut self.layout.pos }
+  fn layout_size(&self) -> &Option<Sizef> { &self.layout.size }
+  fn layout_size_mut(&mut self) -> &mut Option<Sizef> { &mut self.layout.size }
 }
 
 impl BeamNode {
@@ -29,6 +40,7 @@ impl BeamNode {
       connected_to: Vec::new(),
       connected_to_all: false,
       processes: HashMap::new(),
+      layout: Layout::new(Pointf::new(10.0, 20.0)),
     }
   }
 
