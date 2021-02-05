@@ -8,6 +8,7 @@ use qk_livesystem::ui::layout::TLayout;
 use qk_livesystem::ui::draw::TDrawable;
 
 use crate::window::main::app_state::{QkAppState, QkViewMode};
+use qk_livesystem::ui::ui_element_state::UiElementState;
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -90,7 +91,8 @@ impl QkMainWindowContent {
 
     // TODO: Layout component for nodes
     app_state.cluster.nodes.iter().for_each(|node| {
-      node.draw(cr);
+      let element_st = UiElementState::Selected;
+      node.draw(cr, element_st);
     })
   }
 }
