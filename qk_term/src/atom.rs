@@ -18,7 +18,7 @@ lazy_static! {
 }
 
 impl AtomIndex {
-  pub fn find_index(k: &String) -> Option<usize> {
+  pub fn find_index(k: &str) -> Option<usize> {
     let r_lock = ATOM_INDEX.read().unwrap();
     match r_lock.str_to_index.get_key_value(k) {
       None => {
@@ -75,14 +75,14 @@ impl Debug for Atom {
 
 impl Atom {
   pub fn new_str(v: &str) -> Self {
-    return Self::new(&v.to_string());
+    Self::new(&v.to_string())
   }
 
-  pub fn new(v: &String) -> Self {
-    match AtomIndex::find_index(&v) {
+  pub fn new(v: &str) -> Self {
+    match AtomIndex::find_index(&v.to_string()) {
       None => {
         // If the key is not found, we create new atom index and store the atom name there
-        let i = AtomIndex::register_atom(v.clone());
+        let i = AtomIndex::register_atom(v.to_string());
         Atom(i)
       }
       Some(found_index) => {

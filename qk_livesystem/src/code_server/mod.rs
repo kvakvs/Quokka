@@ -13,6 +13,12 @@ pub struct BeamCodeServer {
   modules: HashMap<Atom, Box<BeamModule>>,
 }
 
+impl Default for BeamCodeServer {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl BeamCodeServer {
   pub fn new() -> Self {
     BeamCodeServer {
@@ -21,7 +27,7 @@ impl BeamCodeServer {
   }
 
   pub fn get_or_create_module(&mut self, module: Atom) -> &mut Box<BeamModule> {
-    self.modules.entry(module).or_insert(Box::new(BeamModule::new(module)))
+    self.modules.entry(module).or_insert_with(|| Box::new(BeamModule::new(module)))
     //   None => {
     //     let new_mod = ;
     //     self.modules[module] = new_mod.clone();

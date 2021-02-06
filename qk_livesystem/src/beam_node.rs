@@ -61,7 +61,7 @@ impl BeamNode {
 
 impl TDrawable for BeamNode {
   fn draw(&self, cr: &Context, ui_element_state: UiElementState) {
-    let sz = self.layout.size.unwrap_or(Sizef::new(20.0, 20.0));
+    let sz = self.layout.size.unwrap_or_else(|| Sizef::new(20.0, 20.0));
     let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
                              self.layout.pos.y - 0.5 * sz.y);
 
@@ -74,7 +74,7 @@ impl TDrawable for BeamNode {
 
     // Draw a text node name label under the box
     {
-      let label = self.name.get_str().unwrap_or("?".to_string());
+      let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
       let rect = cr.text_extents(&label);
       let text_start_x = origin.x - rect.width * 0.5 - rect.x_bearing;
       let text_start_y = origin.y + sz.y + rect.height;

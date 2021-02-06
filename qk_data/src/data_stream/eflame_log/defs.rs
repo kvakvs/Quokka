@@ -39,14 +39,14 @@ pub enum EflameValue {
 
 impl EflameValue {
   pub fn get_pid(&self) -> Pid {
-    if let EflameValue::Pid(p) = self { p.clone() } else { panic!("Pid value expected") }
+    if let EflameValue::Pid(p) = self { *p } else { panic!("Pid value expected") }
   }
 
   pub fn get_mfarity(&self) -> MFArity {
-    if let EflameValue::MFArity(mfa) = self { mfa.clone() } else { panic!("MFArity value expected") }
+    if let EflameValue::MFArity(mfa) = self { *mfa } else { panic!("MFArity value expected") }
   }
 
   pub fn get_execution_time(&self) -> ExecutionTime {
-    if let EflameValue::ExecutionTime(e) = self { e.clone() } else { panic!("ExecutionTime value expected") }
+    if let EflameValue::ExecutionTime(e) = self { *e } else { panic!("ExecutionTime value expected") }
   }
 }

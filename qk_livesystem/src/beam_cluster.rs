@@ -8,6 +8,12 @@ pub struct BeamCluster {
   pub nodes: Vec<BeamNode>,
 }
 
+impl Default for BeamCluster {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl BeamCluster {
   pub fn new() -> Self {
     // Default start with one unconnected node

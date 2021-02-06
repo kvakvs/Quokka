@@ -18,7 +18,7 @@ fn main() {
     window::main::start_gui(app);
   });
 
-  gtk_application.run(&vec![]);
+  gtk_application.run(&[]);
   println!("Finished.");
 }
 

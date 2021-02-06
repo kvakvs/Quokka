@@ -20,9 +20,9 @@ pub fn start_gui(gtk_app: &gtk::Application) {
   let qk_app = QkApp::new(gtk_app, app_state.clone());
 
   {
-    let st = app_state.clone();
+    // let st = app_state.clone();
     qk_app.header.btn_cluster.connect_clicked(move |_| {
-      QkAppState::set_view_mode(&st, QkViewMode::Cluster);
+      QkAppState::set_view_mode(&app_state, QkViewMode::Cluster);
     });
   }
 

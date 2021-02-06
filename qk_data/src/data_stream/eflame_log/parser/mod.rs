@@ -74,12 +74,12 @@ fn parse_numeric_pid(i: &str) -> nom::IResult<&str, EflameValue> {
 
 fn parse_mfarity(i: &str) -> nom::IResult<&str, EflameValue> {
   match nom::sequence::tuple(
-      (atom::parse_atom,
-       nom::bytes::complete::tag(":"),
-       atom::parse_atom,
-       nom::bytes::complete::tag("/"),
-       parse_u64,
-      ))(i) {
+    (atom::parse_atom,
+     nom::bytes::complete::tag(":"),
+     atom::parse_atom,
+     nom::bytes::complete::tag("/"),
+     parse_u64,
+    ))(i) {
     Ok((remaining, (m, _, f, _, arity))) => {
       let mfarity = MFArity::new_a(m, f, arity as u16);
       let mfav = EflameValue::MFArity(mfarity);
@@ -116,10 +116,7 @@ pub(crate) fn parse_eflame_log_line(i: &str) -> nom::IResult<&str, EflameLogLine
         let pid = efv_pid.get_pid();
         let stack: Vec<MFArity> = efv_stack
             .into_iter()
-            .map(|efv_mfa| -> MFArity {
-              let mfav = efv_mfa.get_mfarity();
-              mfav
-            })
+            .map(|efv_mfa| -> MFArity { efv_mfa.get_mfarity() })
             .collect();
         let tail = efv_tail.get_execution_time();
 
