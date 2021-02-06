@@ -1,8 +1,7 @@
 use std::sync::{Arc, RwLock};
 
-use gtk::{ContainerExt, WidgetExt, GtkWindowExt};
+use gtk::{WidgetExt, GtkWindowExt};
 
-use crate::window::main;
 use crate::window::main::app_state::QkAppState;
 use crate::window::main::content::QkMainWindowContent;
 use crate::window::main::QkMainWindowHeader;
@@ -28,9 +27,7 @@ impl QkApp {
     // Set the headerbar as the title bar widget.
     window.set_titlebar(Some(&header.container));
     // Set the title of the window.
-    window.set_title("App Name");
-    // Set the window manager class.
-    window.set_wmclass("quokka-observer", "QuokkaObserverAppClass");
+    window.set_title("Quokka Observer");
     // The icon the app will display.
     gtk::Window::set_default_icon_name("iconname");
     // Add the content box into the window.

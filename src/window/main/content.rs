@@ -1,15 +1,14 @@
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
 
-use gtk::BoxExt;
 use gtk::prelude::*;
-use qk_livesystem::ui::size::Sizef;
-use qk_livesystem::ui::layout::TLayout;
+
 use qk_livesystem::ui::draw::TDrawable;
+use qk_livesystem::ui::styling;
+use qk_livesystem::ui::styling::font_style;
+use qk_livesystem::ui::ui_element_state::UiElementState;
 
 use crate::window::main::app_state::{QkAppState, QkViewMode};
-use qk_livesystem::ui::ui_element_state::UiElementState;
-use qk_livesystem::ui::styling;
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -68,7 +67,7 @@ impl QkMainWindowContent {
       QkViewMode::Cluster => {
         Self::drawing_area_draw_cluster(da, cr, app_lock.deref())
       }
-      QkViewMode::Node(pid) => {
+      QkViewMode::Node(_pid) => {
         // Self::drawing_area_draw_node(pid, da, cr, app_lock.deref())
         panic!("Can't draw node view yet")
       }
@@ -88,8 +87,8 @@ impl QkMainWindowContent {
     cr.select_font_face("Sans",
                         cairo::FontSlant::Normal,
                         cairo::FontWeight::Normal);
-    cr.set_font_size(styling::FONT_SIZE);
-    styling::FONT_NORMAL_COLOR.set_source_rgb(cr);
+    cr.set_font_size(font_style::FONT_SIZE);
+    font_style::FONT_NORMAL_COLOR.set_source_rgb(cr);
     cr.move_to(8.0, 20.0);
     cr.show_text(&format!("Cluster view, {} nodes", app_state.cluster.nodes.len()));
 

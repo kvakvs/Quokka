@@ -1,11 +1,10 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 use qk_term::atom::Atom;
-use std::ops::DerefMut;
 use qk_livesystem::beam_cluster::BeamCluster;
 use qk_data::data_stream::eflame_log::EflameLogStream;
 use qk_livesystem::ui::point::Pointf;
 
+#[allow(dead_code)]
 pub enum QkViewMode {
   Cluster,
   Node(Atom),
@@ -30,6 +29,7 @@ impl QkAppState {
     }
   }
 
+  #[allow(dead_code)]
   pub fn load(&mut self) {
     let ef_log = std::boxed::Box::new(EflameLogStream::new("eflame_log.txt").unwrap());
     // ef_log.lines.iter().for_each(|line| { println!("{:?}", line) });

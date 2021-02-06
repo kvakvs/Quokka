@@ -1,16 +1,17 @@
 use std::collections::HashMap;
 
+use cairo::Context;
+
 use qk_term::atom::Atom;
 use qk_term::pid::Pid;
 
 use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
 use crate::Timestamp;
+use crate::ui::draw::TDrawable;
 use crate::ui::layout::{Layout, TLayout};
 use crate::ui::point::Pointf;
 use crate::ui::size::Sizef;
-use crate::ui::draw::TDrawable;
-use cairo::Context;
 use crate::ui::ui_element_state::UiElementState;
 use crate::ui::styling;
 
@@ -64,19 +65,12 @@ impl TDrawable for BeamNode {
     let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
                              self.layout.pos.y - 0.5 * sz.y);
 
-    match ui_element_state {
-      UiElementState::NotSelected => {
-        cr.set_line_width(styling::SELECTED_LINE_WIDTH);
-        styling::LINE_SELECTED_COLOR.set_source_rgb(cr);
-      }
-      UiElementState::Selected => {
-        cr.set_line_width(styling::LINE_WIDTH);
-        styling::LINE_NORMAL_COLOR.set_source_rgb(cr);
-      }
+    // Draw the box
+    {
+      styling::line_style::apply(cr, ui_element_state);
+      cr.rectangle(origin.x, origin.y, sz.x, sz.y);
+      cr.stroke();
     }
-
-    cr.rectangle(origin.x, origin.y, sz.x, sz.y);
-    cr.stroke();
 
     // Draw a text node name label under the box
     {
@@ -86,12 +80,11 @@ impl TDrawable for BeamNode {
       let text_start_y = origin.y + sz.y + rect.height;
 
       // Draw background under the label if selected
-      styling::FONT_SELECTED_BACKGROUND.fill_rectangle(
+      styling::font_style::FONT_SELECTED_BACKGROUND.fill_rectangle(
         cr, text_start_x, text_start_y - rect.height, rect.width, rect.height);
 
       // Draw text
-      styling::font_color(ui_element_state).set_source_rgb(cr);
-      cr.set_font_size(styling::FONT_SIZE);
+      styling::font_style::apply(cr, ui_element_state);
       cr.move_to(text_start_x, text_start_y);
       cr.show_text(&label);
     }
