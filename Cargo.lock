@@ -673,6 +673,7 @@ dependencies = [
  "futures",
  "futures-channel",
  "futures-util",
+ "gdk",
  "gio",
  "gtk",
  "once_cell",

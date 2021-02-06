@@ -10,6 +10,7 @@ use crate::window::main::app_state::QkViewMode;
 pub mod app_state;
 pub mod content;
 pub mod app;
+pub mod selection;
 
 pub fn start_gui(gtk_app: &gtk::Application) {
   // Set the initial state of our health component. We use an `Arc` so that we can share

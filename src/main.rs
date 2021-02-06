@@ -1,4 +1,5 @@
 extern crate gtk;
+extern crate gdk;
 extern crate qk_livesystem;
 extern crate cairo;
 extern crate gio;

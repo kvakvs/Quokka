@@ -2,6 +2,7 @@ use std::ops::Deref;
 use std::sync::{Arc, RwLock};
 
 use gtk::prelude::*;
+use gtk::{WidgetExt};
 
 use qk_livesystem::ui::draw::TDrawable;
 use qk_livesystem::ui::styling;
@@ -9,6 +10,7 @@ use qk_livesystem::ui::styling::font_style;
 use qk_livesystem::ui::ui_element_state::UiElementState;
 
 use crate::window::main::app_state::{QkAppState, QkViewMode};
+use gdk::{EventType, WindowExt};
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -43,8 +45,14 @@ impl QkMainWindowContent {
     let drawing_area = std::boxed::Box::new(gtk::DrawingArea::new)();
     {
       let st = app_state.clone();
-      drawing_area.connect_draw(move |da, ctx| {
-        Self::drawing_area_draw(da, ctx, &st)
+      drawing_area.connect_draw(move |this, ctx| {
+        Self::drawing_area_draw(this, ctx, &st)
+      });
+    }
+    {
+      // let st = app_state.clone();
+      window.connect_event(move |this, ev| {
+        Self::handle_event(this, ev)
       });
     }
 
@@ -57,6 +65,43 @@ impl QkMainWindowContent {
     // container.pack_start(&message, true, false, 0);
 
     QkMainWindowContent { container }
+  }
+
+  fn handle_event(_this: &gtk::ApplicationWindow, ev: &gdk::Event) -> gtk::Inhibit {
+    match ev.get_event_type() {
+      // EventType::MotionNotify => {}
+      EventType::ButtonPress => { Self::handle_button_press(_this, ev) }
+      // EventType::DoubleButtonPress => {}
+      // EventType::TripleButtonPress => {}
+      EventType::ButtonRelease => { Inhibit(false) }
+      // EventType::KeyPress => {}
+      // EventType::KeyRelease => {}
+      // EventType::EnterNotify => {}
+      // EventType::LeaveNotify => {}
+      // EventType::FocusChange => {}
+      // EventType::Configure => {}
+      // EventType::SelectionClear => {}
+      // EventType::SelectionRequest => {}
+      // EventType::SelectionNotify => {}
+      // EventType::DragEnter => {}
+      // EventType::DragLeave => {}
+      // EventType::DragMotion => {}
+      // EventType::DragStatus => {}
+      // EventType::DropStart => {}
+      // EventType::DropFinished => {}
+      // EventType::Scroll => {}
+      // EventType::WindowState => {}
+      // EventType::Setting => {}
+      // EventType::GrabBroken => {}
+      _ => { Inhibit(false) }
+    }
+  }
+
+  fn handle_button_press(_this: &gtk::ApplicationWindow, ev: &gdk::Event) -> gtk::Inhibit {
+    let pos = ev.get_coords().unwrap();
+    let button = ev.get_button().unwrap();
+    println!("Button press {} at {:?}", button, pos);
+    Inhibit(true)
   }
 
   fn drawing_area_draw(da: &gtk::DrawingArea,

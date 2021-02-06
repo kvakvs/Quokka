@@ -3,6 +3,7 @@ use qk_term::atom::Atom;
 use qk_livesystem::beam_cluster::BeamCluster;
 use qk_data::data_stream::eflame_log::EflameLogStream;
 use qk_livesystem::ui::point::Pointf;
+use crate::window::main::selection::QkSelection;
 
 #[allow(dead_code)]
 pub enum QkViewMode {
@@ -17,6 +18,7 @@ pub struct QkAppState {
   pub camera_zoom: f64,
   pub camera_offset: Pointf,
   pub cluster: BeamCluster,
+  pub selected_object: QkSelection,
 }
 
 impl QkAppState {
@@ -26,6 +28,7 @@ impl QkAppState {
       camera_zoom: 1.0,
       camera_offset: Pointf::new(0.0, 0.0),
       cluster: BeamCluster::new(),
+      selected_object: Default::default(),
     }
   }
 
