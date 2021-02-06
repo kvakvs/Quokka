@@ -6,11 +6,13 @@ use gtk::{WidgetExt};
 
 use qk_livesystem::ui::draw::TDrawable;
 use qk_livesystem::ui::styling;
-use qk_livesystem::ui::styling::font_style;
 use qk_livesystem::ui::ui_element_state::UiElementState;
 
 use crate::window::main::app_state::{QkAppState, QkViewMode};
-use gdk::{EventType, WindowExt};
+use gdk::{EventType};
+use crate::window::main::pointer_mode::QkPointerMode;
+use qk_livesystem::ui::point::Pointf;
+use crate::ui::controls::Controls;
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -50,9 +52,9 @@ impl QkMainWindowContent {
       });
     }
     {
-      // let st = app_state.clone();
+      let st = app_state.clone();
       window.connect_event(move |this, ev| {
-        Self::handle_event(this, ev)
+        Self::handle_event(this, ev, &st)
       });
     }
 
@@ -67,13 +69,23 @@ impl QkMainWindowContent {
     QkMainWindowContent { container }
   }
 
-  fn handle_event(_this: &gtk::ApplicationWindow, ev: &gdk::Event) -> gtk::Inhibit {
+  fn handle_event(_this: &gtk::ApplicationWindow,
+                  ev: &gdk::Event,
+                  app_state: &RwLock<QkAppState>) -> gtk::Inhibit {
+    if Controls::is_pan_start_event(ev) {
+      // Right mouse click and drag - enter the document panning mode
+      let pos = ev.get_coords().unwrap();
+      let mut state = app_state.write().unwrap();
+      state.pointer_mode = QkPointerMode::Pan(Pointf::new(pos.0, pos.1));
+      drop(state);
+    }
+
     match ev.get_event_type() {
-      // EventType::MotionNotify => {}
-      EventType::ButtonPress => { Self::handle_button_press(_this, ev) }
+      EventType::MotionNotify => { Self::handle_motion(_this, ev, app_state) }
+      EventType::ButtonPress => { Self::handle_button_press(_this, ev, app_state) }
       // EventType::DoubleButtonPress => {}
       // EventType::TripleButtonPress => {}
-      EventType::ButtonRelease => { Inhibit(false) }
+      EventType::ButtonRelease => { Self::handle_button_release(_this, ev, app_state) }
       // EventType::KeyPress => {}
       // EventType::KeyRelease => {}
       // EventType::EnterNotify => {}
@@ -97,10 +109,35 @@ impl QkMainWindowContent {
     }
   }
 
-  fn handle_button_press(_this: &gtk::ApplicationWindow, ev: &gdk::Event) -> gtk::Inhibit {
+  fn handle_button_press(_this: &gtk::ApplicationWindow,
+                         ev: &gdk::Event,
+                         app_state: &RwLock<QkAppState>) -> gtk::Inhibit {
     let pos = ev.get_coords().unwrap();
     let button = ev.get_button().unwrap();
     println!("Button press {} at {:?}", button, pos);
+
+    // TODO: hit test displayed objects
+
+    Inhibit(true)
+  }
+
+  fn handle_button_release(_this: &gtk::ApplicationWindow,
+                           ev: &gdk::Event,
+                           app_state: &RwLock<QkAppState>) -> gtk::Inhibit {
+    Inhibit(true)
+  }
+
+  fn handle_motion(_this: &gtk::ApplicationWindow,
+                   ev: &gdk::Event,
+                   app_state: &RwLock<QkAppState>) -> gtk::Inhibit {
+    let button = ev.get_button().unwrap();
+
+    if button == 3 { // Right Mouse
+      let state = app_state.read().unwrap();
+      println!("Right mouse drag");
+      drop(state);
+    }
+
     Inhibit(true)
   }
 
@@ -125,17 +162,15 @@ impl QkMainWindowContent {
                                cr: &cairo::Context,
                                app_state: &QkAppState) {
     styling::BACKGROUND_COLOR.clear_with_color(cr);
-    cr.scale(1.0, 1.0);
-    cr.translate(-app_state.camera_offset.x, -app_state.camera_offset.y);
 
     // Draw current mode label
-    cr.select_font_face("Sans",
-                        cairo::FontSlant::Normal,
-                        cairo::FontWeight::Normal);
-    cr.set_font_size(font_style::FONT_SIZE);
-    font_style::FONT_NORMAL_COLOR.set_source_rgb(cr);
+    styling::font_style::apply_info_overlay_font_style(cr);
     cr.move_to(8.0, 20.0);
     cr.show_text(&format!("Cluster view, {} nodes", app_state.cluster.nodes.len()));
+
+    // Reposition camera and set scale
+    cr.scale(1.0, 1.0);
+    cr.translate(-app_state.camera_offset.x, -app_state.camera_offset.y);
 
     // TODO: Layout component for nodes
     app_state.cluster.nodes.iter().for_each(|node| {

@@ -8,6 +8,7 @@ extern crate gio;
 use gio::prelude::*;
 
 mod window;
+mod ui;
 
 fn main() {
   let gtk_application = gtk::Application::new(
