@@ -15,8 +15,8 @@ pub enum QkViewMode {
 pub struct QkAppState {
   // TODO: this below belongs to the current project, when projects are introduced
   pub view_mode: QkViewMode,
-  pub zoom: f64,
-  pub offset: Pointf,
+  pub camera_zoom: f64,
+  pub camera_offset: Pointf,
   pub cluster: BeamCluster,
 }
 
@@ -24,8 +24,8 @@ impl QkAppState {
   pub fn new() -> Self {
     Self {
       view_mode: QkViewMode::Cluster,
-      zoom: 1.0,
-      offset: Pointf::new(0.0, 0.0),
+      camera_zoom: 1.0,
+      camera_offset: Pointf::new(0.0, 0.0),
       cluster: BeamCluster::new(),
     }
   }

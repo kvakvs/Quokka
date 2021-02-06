@@ -9,6 +9,7 @@ use qk_livesystem::ui::draw::TDrawable;
 
 use crate::window::main::app_state::{QkAppState, QkViewMode};
 use qk_livesystem::ui::ui_element_state::UiElementState;
+use qk_livesystem::ui::styling;
 
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
@@ -76,16 +77,19 @@ impl QkMainWindowContent {
     gtk::Inhibit(false)
   }
 
-  fn drawing_area_draw_cluster(da: &gtk::DrawingArea,
+  fn drawing_area_draw_cluster(_da: &gtk::DrawingArea,
                                cr: &cairo::Context,
                                app_state: &QkAppState) {
+    styling::BACKGROUND_COLOR.clear_with_color(cr);
     cr.scale(1.0, 1.0);
+    cr.translate(-app_state.camera_offset.x, -app_state.camera_offset.y);
 
+    // Draw current mode label
     cr.select_font_face("Sans",
                         cairo::FontSlant::Normal,
                         cairo::FontWeight::Normal);
-    cr.set_font_size(12.0);
-
+    cr.set_font_size(styling::FONT_SIZE);
+    styling::FONT_NORMAL_COLOR.set_source_rgb(cr);
     cr.move_to(8.0, 20.0);
     cr.show_text(&format!("Cluster view, {} nodes", app_state.cluster.nodes.len()));
 

@@ -12,6 +12,7 @@ use crate::ui::size::Sizef;
 use crate::ui::draw::TDrawable;
 use cairo::Context;
 use crate::ui::ui_element_state::UiElementState;
+use crate::ui::styling;
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -58,28 +59,41 @@ impl BeamNode {
 }
 
 impl TDrawable for BeamNode {
-  fn draw(&self, cr: &Context, elst: UiElementState) {
+  fn draw(&self, cr: &Context, ui_element_state: UiElementState) {
     let sz = self.layout.size.unwrap_or(Sizef::new(20.0, 20.0));
     let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
                              self.layout.pos.y - 0.5 * sz.y);
 
-    cr.set_source_rgb(0.3, 0.3, 0.3);
+    match ui_element_state {
+      UiElementState::NotSelected => {
+        cr.set_line_width(styling::SELECTED_LINE_WIDTH);
+        styling::LINE_SELECTED_COLOR.set_source_rgb(cr);
+      }
+      UiElementState::Selected => {
+        cr.set_line_width(styling::LINE_WIDTH);
+        styling::LINE_NORMAL_COLOR.set_source_rgb(cr);
+      }
+    }
+
     cr.rectangle(origin.x, origin.y, sz.x, sz.y);
     cr.stroke();
 
-    const FONT_HEIGHT: f64 = 12.0;
-    cr.set_font_size(FONT_HEIGHT);
-
     // Draw a text node name label under the box
-    let label = self.name.get_str().unwrap_or("?".to_string());
-    let label_ext = cr.text_extents(&label);
+    {
+      let label = self.name.get_str().unwrap_or("?".to_string());
+      let rect = cr.text_extents(&label);
+      let text_start_x = origin.x - rect.width * 0.5 - rect.x_bearing;
+      let text_start_y = origin.y + sz.y + rect.height;
 
-    if elst == UiElementState::Selected {
-      cr.fi();
+      // Draw background under the label if selected
+      styling::FONT_SELECTED_BACKGROUND.fill_rectangle(
+        cr, text_start_x, text_start_y - rect.height, rect.width, rect.height);
+
+      // Draw text
+      styling::font_color(ui_element_state).set_source_rgb(cr);
+      cr.set_font_size(styling::FONT_SIZE);
+      cr.move_to(text_start_x, text_start_y);
+      cr.show_text(&label);
     }
-
-    cr.move_to(origin.x - label_ext.width * 0.5 - label_ext.x_bearing,
-               origin.y + sz.y + label_ext.height);
-    cr.show_text(&label);
   }
 }
