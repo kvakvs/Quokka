@@ -2,19 +2,18 @@ use std::sync::{Arc, RwLock};
 
 use gtk::{WidgetExt, GtkWindowExt};
 
-use crate::window::main::app_state::QkAppState;
+use crate::app::QkApp;
 use crate::window::main::content::QkMainWindowContent;
-use crate::window::main::QkMainWindowHeader;
+use crate::window::main::window_header::QkMainWindowHeader;
 
-pub struct QkApp {
+pub struct QkGui {
   pub window: gtk::ApplicationWindow,
   pub header: QkMainWindowHeader,
   pub content: QkMainWindowContent,
-  pub app_state: Arc<RwLock<QkAppState>>,
 }
 
-impl QkApp {
-  pub fn new(gtk_app: &gtk::Application, app_state: Arc<RwLock<QkAppState>>) -> QkApp {
+impl QkGui {
+  pub fn new(gtk_app: &gtk::Application, app_state: Arc<RwLock<QkApp>>) -> QkGui {
     // Create a new top level window.
     // let window = gtk::Window::new(gtk::WindowType::Toplevel);
     let window = gtk::ApplicationWindow::new(gtk_app);
@@ -43,11 +42,10 @@ impl QkApp {
     // create_drawable2(gtk_app);
 
     // Return our main application state
-    QkApp {
+    QkGui {
       window,
       header,
       content,
-      app_state,
     }
   }
 }
