@@ -67,17 +67,17 @@ impl QkApp {
   //   drop(this);
   // }
 
-  pub fn read_with<T>(
-    state_rwlock: &RwLock<Self>,
-    func: fn(state: &Self) -> T,
-  ) -> T {
+  pub fn read_with<T, TFun>(state_rwlock: &RwLock<Self>, func: TFun) -> T
+  where TFun: Fn(&Self) -> T {
     let state = state_rwlock.read().unwrap();
     let result = func(&state);
     drop(state);
     result
   }
 
-  pub fn modify_with(state_rwlock: &RwLock<Self>, mut_func: fn(state: &mut Self) -> ()) {
+  pub fn modify_with<TFun>(state_rwlock: &RwLock<Self>, mut_func: TFun)
+  where TFun: Fn(&mut Self) {
+    // Type for TFun fn(state: &mut Self) -> ()
     let mut state = state_rwlock.write().unwrap();
     mut_func(&mut state);
     drop(state);

@@ -2,8 +2,8 @@ use std::ops::Deref;
 use std::sync::{Arc, RwLock};
 
 use gdk::EventType;
-use gio::prelude::*;
-use gtk::WidgetExt;
+// use gio::prelude::*;
+use gtk::{WidgetExt};
 use gtk::prelude::*;
 
 use qk_livesystem::ui::draw::TDrawable;
@@ -18,8 +18,6 @@ use crate::window::main::pointer_mode::QkPointerMode;
 pub struct QkMainWindowContent {
   pub container: gtk::Box,
   pub draw_area: gtk::DrawingArea,
-  // pub health: gtk::Label,
-  // pub message: gtk::Label,
 }
 
 impl QkMainWindowContent {
@@ -126,9 +124,18 @@ impl QkMainWindowContent {
                                         |r| { r.pointer_mode });
     match pointer_mode {
       QkPointerMode::Normal => {} // no action
-      QkPointerMode::Pan(_) => {
-        let pos = ev.get_coords().unwrap();
-        println!("Right mouse drag {:?}", pos);
+      QkPointerMode::Pan(start_pan_point) => {
+        let pos = Pointf::from(ev.get_coords().unwrap());
+        let camera_offset = QkApp::read_with(app_state,
+                                             |r| { r.camera_offset });
+        let diff = pos - start_pan_point;
+        QkApp::modify_with(app_state,
+        |w| {
+          w.camera_offset = camera_offset + diff;
+          w.pointer_mode = QkPointerMode::Pan(pos);
+          println!("Right mouse drag pos={:?} new cam_offs={:?}", pos, w.camera_offset);
+        });
+        this.queue_draw();
       }
     }
 
@@ -164,7 +171,7 @@ impl QkMainWindowContent {
 
     // Reposition camera and set scale
     cr.scale(1.0, 1.0);
-    cr.translate(-app_state.camera_offset.x, -app_state.camera_offset.y);
+    cr.translate(app_state.camera_offset.x, app_state.camera_offset.y);
 
     // TODO: Layout component for nodes
     app_state.cluster.nodes.iter().for_each(|node| {
