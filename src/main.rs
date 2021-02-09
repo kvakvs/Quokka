@@ -2,6 +2,8 @@ extern crate qk_livesystem;
 
 use crate::app::QkApp;
 use imgui::*;
+use qk_livesystem::ui::ui_element_state::UiElementState;
+use qk_livesystem::ui::draw::TDrawable;
 
 mod window;
 mod ui;
@@ -65,25 +67,21 @@ fn quokka_cluster_view(ui: &mut Ui, app: &mut QkApp) {
         // channel 0. As a result, the red line will always appear on top of
         // the white circle.
         draw_list.channels_split(2, |channels| {
-          const RADIUS: f32 = 100.0;
           let canvas_pos = ui.cursor_screen_pos();
           channels.set_current(1);
-          draw_list
-              .add_line(
-                canvas_pos,
-                [canvas_pos[0] + RADIUS, canvas_pos[1] + RADIUS],
-                RED,
-              )
-              .thickness(5.0)
-              .build();
+          app.cluster.nodes.iter().for_each(|n| {
+            n.draw(canvas_pos.into(), &draw_list, UiElementState::NotSelected);
+          });
 
-          channels.set_current(0);
-          let center = [canvas_pos[0] + RADIUS, canvas_pos[1] + RADIUS];
-          draw_list
-              .add_circle(center, RADIUS, WHITE)
-              .thickness(10.0)
-              .num_segments(50)
-              .build();
+          // Draw under
+
+          // channels.set_current(0);
+          // let center = [canvas_pos[0] + RADIUS, canvas_pos[1] + RADIUS];
+          // draw_list
+          //     .add_circle(center, RADIUS, WHITE)
+          //     .thickness(10.0)
+          //     .num_segments(50)
+          //     .build();
         });
       });
 }

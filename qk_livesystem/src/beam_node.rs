@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use qk_term::atom::Atom;
 use qk_term::pid::Pid;
+use imgui::*;
 
 use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
@@ -57,10 +58,21 @@ impl BeamNode {
 }
 
 impl TDrawable for BeamNode {
-  fn draw(&self, ui: &imgui::Ui, ui_element_state: UiElementState) {
+  fn draw(&self,
+          window_offset: Pointf,
+          // ui: &mut imgui::Ui,
+          draw_list: &imgui::DrawListMut,
+          ui_element_state: UiElementState) {
     let sz = self.layout.size.unwrap_or_else(|| Sizef::new(20.0, 20.0));
-    let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
-                             self.layout.pos.y - 0.5 * sz.y);
+    let origin = Pointf::new(
+      self.layout.pos.x - 0.5 * sz.x,
+      self.layout.pos.y - 0.5 * sz.y,
+    ) + window_offset;
+
+    const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+    draw_list.add_rect(origin.into(), (origin + sz).into(), WHITE)
+        .thickness(2.0)
+        .build();
 
     // // Draw the box
     // {
@@ -71,10 +83,10 @@ impl TDrawable for BeamNode {
     //
     // // Draw a text node name label under the box
     // {
-    //   let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
-    //   let rect = cr.text_extents(&label);
-    //   let text_start_x = origin.x - rect.width * 0.5 - rect.x_bearing;
-    //   let text_start_y = origin.y + sz.y + rect.height;
+    let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
+    let rect = Sizef::new(32.0, 16.0);
+    let text_start = Pointf::new(origin.x - rect.x * 0.5, origin.y + sz.y + rect.y);
+    draw_list.add_text(text_start.into(), WHITE, ImString::from(label));
     //
     //   // Draw background under the label if selected
     //   styling::font_style::FONT_SELECTED_BACKGROUND.fill_rectangle(
