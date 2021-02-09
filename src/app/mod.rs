@@ -86,6 +86,7 @@ impl QkApp {
     drop(state);
   }
 
+  /// Attempt to hit one node with mouse_pos, return QkNodeSelection as a result (one or none).
   pub fn try_select_one_node(&mut self, mouse_pos: &Pointf) -> QkNodeSelection {
     if let Some(node) = self.cluster.nodes.iter().find(|node| {
       node.is_mouse_hit(mouse_pos)
@@ -96,6 +97,8 @@ impl QkApp {
     }
   }
 
+  /// Draw a window "BrowseWindow" (it will retain size of previous BrowseWindow) for when we're
+  /// viewing a BEAM cluster (all connected nodes that we know).
   pub fn cluster_view(&mut self, ui: &mut Ui) {
     imgui::Window::new(imgui::im_str!("Cluster View###BrowseWindow"))
         .size([800.0, 500.0], Condition::FirstUseEver)
@@ -166,6 +169,8 @@ impl QkApp {
         });
   }
 
+  /// Draw a window "BrowseWindow" (it will retain size of previous BrowseWindow) for when we're
+  /// viewing a BEAM node with the name stored in self.view_mode.
   pub fn node_view(&mut self, ui: &mut Ui) {
     imgui::Window::new(imgui::im_str!("Node View###BrowseWindow"))
         .size([800.0, 500.0], Condition::FirstUseEver)
