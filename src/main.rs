@@ -1,32 +1,52 @@
-extern crate gtk;
-extern crate gdk;
 extern crate qk_livesystem;
-extern crate cairo;
-extern crate gio;
-// #[macro_use] extern crate lazy_static;
 
-// use gtk::prelude::*;
-use gio::prelude::*;
-use window::main::gui::{QkGui};
 use crate::app::QkApp;
+use imgui::*;
 
 mod window;
 mod ui;
 mod app;
 
+pub const WINDOW_TITLE: &'static str = "Quokka Observer";
+
 fn main() {
-  let gtk_application = gtk::Application::new(
-    Option::from("se.clau.quokka"),
-    gio::ApplicationFlags::FLAGS_NONE,
-  ).expect("Gtk Application initialization failed...");
+  let mut state = QkApp::new();
+  let system = crate::ui::startup::init(WINDOW_TITLE);
 
-  gtk_application.connect_activate(|gtk_app1| {
-    // no return value, no global App variable
-    // it all gets distributed into closures attached to widget handlers
-    QkApp::setup_qk_app(gtk_app1);
+  system.main_loop(move |run, ui| {
+    quokka_menubar(ui, &mut state);
+    quokka_cluster_view(ui, &mut state)
   });
-
-  gtk_application.run(&[]);
-  println!("Finished.");
 }
 
+fn quokka_menubar(ui: &mut Ui, app: &mut QkApp) {
+  ui.main_menu_bar(|| {
+    //---------------------
+    // Test Menu
+    //---------------------
+    ui.menu(im_str!("Test"), true, || {
+      if MenuItem::new(im_str!("Load Eflame2 Test"))
+          .shortcut(im_str!("Alt+1"))
+          .build(ui) {
+        app.load()
+      }
+    })
+  });
+}
+
+fn quokka_cluster_view(ui: &mut Ui, app: &mut QkApp) {
+  imgui::Window::new(imgui::im_str!("Cluster View"))
+      .size([250.0, 500.0], Condition::Always) // was Condition::FirstUseEver
+      .build(ui, || {
+        // ui.text(im_str!("Cluster View"));
+        // ui.button(im_str!("Cluster"), [0.0, 0.0]);
+        // ui.button(im_str!("Node"), [0.0, 0.0]);
+        // ui.separator();
+
+        // let mouse_pos = ui.io().mouse_pos;
+        // ui.text(format!(
+        //   "Mouse Position: ({:.1},{:.1})",
+        //   mouse_pos[0], mouse_pos[1]
+        // ));
+      });
+}

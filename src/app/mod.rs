@@ -1,6 +1,4 @@
 use std::sync::{Arc, RwLock};
-use gtk::{ButtonExt, WidgetExt};
-use gtk::prelude::*;
 use qk_data::data_stream::eflame_log::EflameLogStream;
 use qk_livesystem::beam_cluster::BeamCluster;
 use qk_livesystem::ui::point::Pointf;
@@ -9,8 +7,6 @@ use qk_term::atom::Atom;
 use crate::window::main::node_selection::QkNodeSelection;
 use crate::window::main::pointer_mode::QkPointerMode;
 use crate::window::main::process_selection::QkProcessSelection;
-use crate::window::main::window_header::QkMainWindowHeader;
-use crate::window::main::content::QkMainWindowContent;
 
 #[allow(dead_code)]
 pub enum QkViewMode {
@@ -68,7 +64,7 @@ impl QkApp {
   // }
 
   pub fn read_with<T, TFun>(state_rwlock: &RwLock<Self>, func: TFun) -> T
-  where TFun: Fn(&Self) -> T {
+    where TFun: Fn(&Self) -> T {
     let state = state_rwlock.read().unwrap();
     let result = func(&state);
     drop(state);
@@ -76,65 +72,10 @@ impl QkApp {
   }
 
   pub fn modify_with<TFun>(state_rwlock: &RwLock<Self>, mut_func: TFun)
-  where TFun: Fn(&mut Self) {
+    where TFun: Fn(&mut Self) {
     // Type for TFun fn(state: &mut Self) -> ()
     let mut state = state_rwlock.write().unwrap();
     mut_func(&mut state);
     drop(state);
-  }
-
-  fn create_gui(
-    gtk_app: &gtk::Application, app_state: Arc<RwLock<QkApp>>,
-  ) -> (gtk::ApplicationWindow, QkMainWindowHeader, QkMainWindowContent) {
-    // Create a new top level window.
-    // let window = gtk::Window::new(gtk::WindowType::Toplevel);
-    let window = gtk::ApplicationWindow::new(gtk_app);
-
-    // Create a the headerbar and it's associated content.
-    let header = QkMainWindowHeader::new();
-    // Contains the content within the window.
-    let content = QkMainWindowContent::new(&window, &app_state);
-
-    // Set the headerbar as the title bar widget.
-    window.set_titlebar(Some(&header.container));
-    // Set the title of the window.
-    window.set_title("Quokka Observer");
-    // The icon the app will display.
-    gtk::Window::set_default_icon_name("iconname");
-    // Add the content box into the window.
-    // window.add(&content.container);
-
-    // Programs what to do when the exit button is used.
-    window.connect_delete_event(move |_, _| {
-      gtk::main_quit();
-      gtk::Inhibit(false)
-    });
-
-    // let draw_window = main::create_drawable1(gtk_app);
-    // create_drawable2(gtk_app);
-
-    (window, header, content, )
-  }
-
-  pub fn setup_qk_app(gtk_app: &gtk::Application) {
-    // Set the initial state of our health component. We use an `Arc` so that we can share
-    // this value across multiple programmable closures.
-    let app_state = Arc::new(RwLock::new(QkApp::new()));
-
-    // Initialize the UI's initial state
-    let (
-      app_window, header, content
-    ) = Self::create_gui(gtk_app, app_state.clone());
-
-    {
-      // let st = app_state.clone();
-      header.btn_cluster.connect_clicked(move |_| {
-        QkApp::modify_with(&app_state,
-                           |w| { w.view_mode = QkViewMode::Cluster });
-      });
-    }
-
-    // Make all the widgets within the UI visible.
-    app_window.show_all();
   }
 }

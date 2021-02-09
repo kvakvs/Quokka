@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use cairo::Context;
-
 use qk_term::atom::Atom;
 use qk_term::pid::Pid;
 
@@ -13,7 +11,6 @@ use crate::ui::layout::{Layout, TLayout};
 use crate::ui::point::Pointf;
 use crate::ui::size::Sizef;
 use crate::ui::ui_element_state::UiElementState;
-use crate::ui::styling;
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -60,33 +57,33 @@ impl BeamNode {
 }
 
 impl TDrawable for BeamNode {
-  fn draw(&self, cr: &Context, ui_element_state: UiElementState) {
+  fn draw(&self, ui: &imgui::Ui, ui_element_state: UiElementState) {
     let sz = self.layout.size.unwrap_or_else(|| Sizef::new(20.0, 20.0));
     let origin = Pointf::new(self.layout.pos.x - 0.5 * sz.x,
                              self.layout.pos.y - 0.5 * sz.y);
 
-    // Draw the box
-    {
-      styling::line_style::apply(cr, ui_element_state);
-      cr.rectangle(origin.x, origin.y, sz.x, sz.y);
-      cr.stroke();
-    }
-
-    // Draw a text node name label under the box
-    {
-      let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
-      let rect = cr.text_extents(&label);
-      let text_start_x = origin.x - rect.width * 0.5 - rect.x_bearing;
-      let text_start_y = origin.y + sz.y + rect.height;
-
-      // Draw background under the label if selected
-      styling::font_style::FONT_SELECTED_BACKGROUND.fill_rectangle(
-        cr, text_start_x, text_start_y - rect.height, rect.width, rect.height);
-
-      // Draw text
-      styling::font_style::apply(cr, ui_element_state);
-      cr.move_to(text_start_x, text_start_y);
-      cr.show_text(&label);
-    }
+    // // Draw the box
+    // {
+    //   styling::line_style::apply(cr, ui_element_state);
+    //   cr.rectangle(origin.x, origin.y, sz.x, sz.y);
+    //   cr.stroke();
+    // }
+    //
+    // // Draw a text node name label under the box
+    // {
+    //   let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
+    //   let rect = cr.text_extents(&label);
+    //   let text_start_x = origin.x - rect.width * 0.5 - rect.x_bearing;
+    //   let text_start_y = origin.y + sz.y + rect.height;
+    //
+    //   // Draw background under the label if selected
+    //   styling::font_style::FONT_SELECTED_BACKGROUND.fill_rectangle(
+    //     cr, text_start_x, text_start_y - rect.height, rect.width, rect.height);
+    //
+    //   // Draw text
+    //   styling::font_style::apply(cr, ui_element_state);
+    //   cr.move_to(text_start_x, text_start_y);
+    //   cr.show_text(&label);
+    // }
   }
 }
