@@ -1,4 +1,5 @@
 pub mod point;
+pub mod rect;
 pub mod size;
 pub mod layout;
 pub mod draw;

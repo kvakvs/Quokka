@@ -4,19 +4,25 @@ use crate::ui::size::Sizef;
 
 #[derive(Copy, Clone)]
 pub struct Pointf {
-  pub x: f64,
-  pub y: f64,
+  pub x: f32,
+  pub y: f32,
+}
+
+impl Default for Pointf {
+  fn default() -> Self {
+    Pointf::new(0.0, 0.0)
+  }
 }
 
 impl From<[f32; 2]> for Pointf {
   fn from(p: [f32; 2]) -> Self {
-    Self::new(p[0] as f64, p[1] as f64)
+    Self::new(p[0], p[1])
   }
 }
 
 impl Into<[f32; 2]> for Pointf {
   fn into(self) -> [f32; 2] {
-    [self.x as f32, self.y as f32]
+    [self.x, self.y]
   }
 }
 
@@ -27,7 +33,7 @@ impl Debug for Pointf {
 }
 
 impl Pointf {
-  pub fn new(x: f64, y: f64) -> Self {
+  pub fn new(x: f32, y: f32) -> Self {
     Pointf { x, y }
   }
 }

@@ -1,9 +1,12 @@
 extern crate qk_livesystem;
 
-use crate::app::QkApp;
+use crate::app::{QkApp, QkViewMode};
 use imgui::*;
-use qk_livesystem::ui::ui_element_state::UiElementState;
+// use qk_livesystem::ui::ui_element_state::UiElementState;
 use qk_livesystem::ui::draw::TDrawable;
+use qk_livesystem::ui::point::Pointf;
+use qk_livesystem::beam_node::BeamNode;
+use crate::window::main::node_selection::QkNodeSelection;
 
 mod window;
 mod ui;
@@ -17,7 +20,12 @@ fn main() {
 
   system.main_loop(move |run, ui| {
     quokka_menubar(ui, run, &mut state);
-    quokka_cluster_view(ui, &mut state)
+    match state.view_mode {
+      QkViewMode::Cluster => { state.cluster_view(ui) }
+      QkViewMode::Node(_) => { state.node_view(ui) }
+    }
+    // state.cluster_view(ui);
+    // state.node_view(ui);
   });
 }
 
@@ -39,49 +47,4 @@ fn quokka_menubar(ui: &mut Ui, run: &mut bool, app: &mut QkApp) {
       }
     })
   });
-}
-
-fn quokka_cluster_view(ui: &mut Ui, app: &mut QkApp) {
-  imgui::Window::new(imgui::im_str!("Cluster View"))
-      .size([250.0, 500.0], Condition::Always) // was Condition::FirstUseEver
-      .build(ui, || {
-        // ui.text(im_str!("Cluster View"));
-        // ui.button(im_str!("Cluster"), [0.0, 0.0]);
-        // ui.button(im_str!("Node"), [0.0, 0.0]);
-        // ui.separator();
-
-        // let mouse_pos = ui.io().mouse_pos;
-        // ui.text(format!(
-        //   "Mouse Position: ({:.1},{:.1})",
-        //   mouse_pos[0], mouse_pos[1]
-        // ));
-
-        const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-
-        let draw_list = ui.get_window_draw_list();
-        // Will draw channel 0 first, then channel 1, whatever the order of
-        // the calls in the code.
-        //
-        // Here, we draw a red line on channel 1 then a white circle on
-        // channel 0. As a result, the red line will always appear on top of
-        // the white circle.
-        draw_list.channels_split(2, |channels| {
-          let canvas_pos = ui.cursor_screen_pos();
-          channels.set_current(1);
-          app.cluster.nodes.iter().for_each(|n| {
-            n.draw(canvas_pos.into(), &draw_list, UiElementState::NotSelected);
-          });
-
-          // Draw under
-
-          // channels.set_current(0);
-          // let center = [canvas_pos[0] + RADIUS, canvas_pos[1] + RADIUS];
-          // draw_list
-          //     .add_circle(center, RADIUS, WHITE)
-          //     .thickness(10.0)
-          //     .num_segments(50)
-          //     .build();
-        });
-      });
 }

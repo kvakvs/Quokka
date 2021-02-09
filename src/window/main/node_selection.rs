@@ -1,6 +1,7 @@
 use qk_term::atom::Atom;
 
 /// Represents selection of none, one, or some nodes in Cluster-view
+#[derive(Debug)]
 pub enum QkNodeSelection {
   None,
 

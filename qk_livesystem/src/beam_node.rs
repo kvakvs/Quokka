@@ -8,7 +8,7 @@ use crate::beam_process::BeamProcess;
 use crate::code_server::BeamCodeServer;
 use crate::Timestamp;
 use crate::ui::draw::TDrawable;
-use crate::ui::layout::{Layout, TLayout};
+use crate::ui::layout::{Layout};
 use crate::ui::point::Pointf;
 use crate::ui::size::Sizef;
 use crate::ui::ui_element_state::UiElementState;
@@ -16,7 +16,7 @@ use crate::ui::ui_element_state::UiElementState;
 #[derive(Debug)]
 pub struct BeamNode {
   // Distribution and node name
-  name: Atom,
+  pub name: Atom,
   hidden: bool,
   connected_to: Vec<Atom>,
   connected_to_all: bool,
@@ -31,12 +31,12 @@ pub struct BeamNode {
   processes: HashMap<Pid, BeamProcess>,
 }
 
-impl TLayout for BeamNode {
-  fn layout_pos(&self) -> &Pointf { &self.layout.pos }
-  fn layout_pos_mut(&mut self) -> &mut Pointf { &mut self.layout.pos }
-  fn layout_size(&self) -> &Option<Sizef> { &self.layout.size }
-  fn layout_size_mut(&mut self) -> &mut Option<Sizef> { &mut self.layout.size }
-}
+// impl TLayout for BeamNode {
+//   fn layout_pos(&self) -> &Pointf { &self.layout.pos }
+//   fn layout_pos_mut(&mut self) -> &mut Pointf { &mut self.layout.pos }
+//   fn layout_size(&self) -> &Option<Sizef> { &self.layout.size }
+//   fn layout_size_mut(&mut self) -> &mut Option<Sizef> { &mut self.layout.size }
+// }
 
 impl BeamNode {
   pub fn new(name: Atom, hidden: bool) -> Self {
@@ -55,6 +55,10 @@ impl BeamNode {
     assert_eq!(when, None);
     self.processes.insert(pid, BeamProcess::new(pid, when));
   }
+
+  pub fn is_mouse_hit(&self, mouse: &Pointf) -> bool {
+    self.layout.draw_box.contains_point(mouse)
+  }
 }
 
 impl TDrawable for BeamNode {
@@ -63,14 +67,17 @@ impl TDrawable for BeamNode {
           // ui: &mut imgui::Ui,
           draw_list: &imgui::DrawListMut,
           ui_element_state: UiElementState) {
-    let sz = self.layout.size.unwrap_or_else(|| Sizef::new(20.0, 20.0));
-    let origin = Pointf::new(
-      self.layout.pos.x - 0.5 * sz.x,
-      self.layout.pos.y - 0.5 * sz.y,
-    ) + window_offset;
-
     const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-    draw_list.add_rect(origin.into(), (origin + sz).into(), WHITE)
+    const SELECTED_COLOR: [f32; 4] = [0.4, 0.7, 1.0, 1.0];
+
+    let draw_color = match ui_element_state {
+      UiElementState::NotSelected => {WHITE}
+      UiElementState::Selected => {SELECTED_COLOR}
+    };
+
+    draw_list.add_rect((self.layout.draw_box.start + window_offset).into(),
+                       (self.layout.draw_box.end + window_offset).into(),
+                       draw_color)
         .thickness(2.0)
         .build();
 
@@ -85,8 +92,11 @@ impl TDrawable for BeamNode {
     // {
     let label = self.name.get_str().unwrap_or_else(|| "?".to_string());
     let rect = Sizef::new(32.0, 16.0);
-    let text_start = Pointf::new(origin.x - rect.x * 0.5, origin.y + sz.y + rect.y);
-    draw_list.add_text(text_start.into(), WHITE, ImString::from(label));
+    let text_start = Pointf::new(
+      self.layout.draw_box.start.x - rect.x * 0.5,
+      self.layout.draw_box.end.y + rect.y,
+    ) + window_offset;
+    draw_list.add_text(text_start.into(), draw_color, ImString::from(label));
     //
     //   // Draw background under the label if selected
     //   styling::font_style::FONT_SELECTED_BACKGROUND.fill_rectangle(

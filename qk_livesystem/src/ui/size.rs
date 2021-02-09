@@ -3,8 +3,8 @@ use std::fmt::Debug;
 
 #[derive(Copy, Clone)]
 pub struct Sizef {
-  pub x: f64,
-  pub y: f64,
+  pub x: f32,
+  pub y: f32,
 }
 
 impl Debug for Sizef {
@@ -14,7 +14,7 @@ impl Debug for Sizef {
 }
 
 impl Sizef {
-  pub fn new(x: f64, y: f64) -> Self {
+  pub fn new(x: f32, y: f32) -> Self {
     Sizef { x, y }
   }
 }
