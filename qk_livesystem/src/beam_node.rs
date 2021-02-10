@@ -12,6 +12,8 @@ use crate::ui::layout::{Layout};
 use crate::ui::point::Pointf;
 use crate::ui::size::Sizef;
 use crate::ui::ui_element_state::UiElementState;
+use qk_term::mfarity::MFArity;
+use petgraph::graph::{Node, NodeIndex};
 
 #[derive(Debug)]
 pub struct BeamNode {
@@ -21,14 +23,17 @@ pub struct BeamNode {
   connected_to: Vec<Atom>,
   connected_to_all: bool,
 
-  // UI section: positioning, classification, tags, colors, grouping
+  /// UI section: positioning, classification, tags, colors, grouping
   layout: Layout,
 
-  // Static (more or less static) resources, such as code structure
+  /// Static (more or less static) resources, such as code structure
   pub(crate) code: Box<BeamCodeServer>,
 
-  // Processes
+  /// Processes
   processes: HashMap<Pid, BeamProcess>,
+
+  /// Graph for function-call-function relations
+  rel_call: petgraph::Graph::<MFArity, (), petgraph::Directed>,
 }
 
 // impl TLayout for BeamNode {
@@ -48,12 +53,34 @@ impl BeamNode {
       connected_to_all: false,
       processes: HashMap::new(),
       layout: Layout::new(Pointf::new(40.0, 30.0)),
+      rel_call: petgraph::Graph::new(),
     }
   }
 
+  /// Used when loading or reading data stream from the live node or logs.
+  /// This lets BeamNode know that a process with this pid has been found. No extra data is stored
+  /// with that process at this point.
   pub fn learned_new_pid(&mut self, pid: Pid, when: Option<Timestamp>) {
     assert_eq!(when, None);
     self.processes.insert(pid, BeamProcess::new(pid, when));
+  }
+
+  fn add_rel_call_unique_node(&mut self, new_node: &MFArity) -> NodeIndex {
+    match self.rel_call.raw_nodes().iter().enumerate()
+        .find(|(i, n)| {
+          n.weight == *new_node
+        })
+    {
+      None => { self.rel_call.add_node(*new_node) }
+      Some((i, n)) => { NodeIndex::new(i) }
+    }
+  }
+
+  /// Used when loading or reading data stream from the live node or logs.
+  pub fn learned_new_call_relation(&mut self, caller: &MFArity, call_target: &MFArity) {
+    let a = self.add_rel_call_unique_node(caller);
+    let b = self.add_rel_call_unique_node(call_target);
+    self.rel_call.add_edge(a, b, ());
   }
 
   pub fn is_mouse_hit(&self, mouse: &Pointf) -> bool {
@@ -71,8 +98,8 @@ impl TDrawable for BeamNode {
     const SELECTED_COLOR: [f32; 4] = [0.4, 0.7, 1.0, 1.0];
 
     let draw_color = match ui_element_state {
-      UiElementState::NotSelected => {WHITE}
-      UiElementState::Selected => {SELECTED_COLOR}
+      UiElementState::NotSelected => { WHITE }
+      UiElementState::Selected => { SELECTED_COLOR }
     };
 
     draw_list.add_rect((self.layout.draw_box.start + window_offset).into(),

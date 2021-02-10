@@ -23,6 +23,7 @@ fn main() {
     match state.view_mode {
       QkViewMode::Cluster => { state.cluster_view(ui) }
       QkViewMode::Node(_) => { state.node_view(ui) }
+      QkViewMode::NodeCode(_) => { state.node_code_view(ui) }
     }
     // state.cluster_view(ui);
     // state.node_view(ui);
@@ -31,9 +32,6 @@ fn main() {
 
 fn quokka_menubar(ui: &mut Ui, run: &mut bool, app: &mut QkApp) {
   ui.main_menu_bar(|| {
-    //---------------------
-    // Test Menu
-    //---------------------
     ui.menu(im_str!("Quokka"), true, || {
       if MenuItem::new(im_str!("Exit")).build(ui) {
         *run = false;

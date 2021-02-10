@@ -2,6 +2,8 @@ use crate::beam_node::BeamNode;
 use qk_term::atom::Atom;
 use qk_data::data_stream::t_data_stream::{TDataStream, StreamCaps};
 use qk_data::stream_event::StreamEvent;
+use qk_data::data_stream::eflame_log::defs::EflameValue;
+use qk_term::mfarity::MFArity;
 
 #[derive(Debug)]
 pub struct BeamCluster {
@@ -36,11 +38,19 @@ impl BeamCluster {
     let load_event = |evt: StreamEvent| {
       match evt {
         StreamEvent::ExecuteFunctionEvent(ef) => {
-          ef.stack.iter().for_each(|ref mfa| {
+          let mut prev_mfa: Option<MFArity> = None;
+          ef.stack.iter().for_each(|mfa| {
             // assume that this is loaded in single node mode only
             self.nodes[0].code.learned_new_mfa(mfa);
-            self.nodes[0].learned_new_pid(ef.pid, None)
-          })
+
+            // Register a call relation, previous mfa calls current mfa in the callstack,
+            // except the first, first is ignored as it has no caller.
+            if prev_mfa.is_some() {
+              self.nodes[0].learned_new_call_relation(&prev_mfa.unwrap(), mfa);
+            }
+            prev_mfa = Some(*mfa);
+          });
+          self.nodes[0].learned_new_pid(ef.pid, None)
         }
         e => {
           panic!("Don't know how to import {:?}", e)

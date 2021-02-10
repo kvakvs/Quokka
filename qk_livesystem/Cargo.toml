@@ -12,3 +12,4 @@ qk_data = { path = "../qk_data" }
 chrono = "0.4.19"
 imgui = "0.7.0"
 #cairo-rs = { version = "0.9.1", features = ["png"] }
+petgraph = "0.5.1"

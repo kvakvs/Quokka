@@ -12,9 +12,21 @@ use qk_livesystem::ui::ui_element_state::UiElementState;
 use qk_livesystem::ui::draw::TDrawable;
 
 #[allow(dead_code)]
+#[derive(Copy, Clone)]
 pub enum QkViewMode {
   Cluster,
   Node(Atom),
+  NodeCode(Atom),
+}
+
+impl QkViewMode {
+  pub fn get_node(self) -> Option<Atom> {
+    match self {
+      QkViewMode::Cluster => { None }
+      QkViewMode::Node(a) => { Some(a) }
+      QkViewMode::NodeCode(b) => { Some(b) }
+    }
+  }
 }
 
 /// Stores application global state: That is current opened project, view mode etc.
@@ -180,8 +192,13 @@ impl QkApp {
             // ui.text(im_str!("Double click nodes to look inside"));
           }
 
-          if ui.button(im_str!("Return to cluster view###BtnReturn"), [0.0, 0.0]) {
+          if ui.button(im_str!("Return to Cluster"), [128.0, 0.0]) {
             self.view_mode = QkViewMode::Cluster
+          }
+          ui.same_line(140.0);
+          if ui.button(im_str!("View Code"), [0.0, 0.0]) {
+            let curr_node = self.view_mode.get_node();
+            self.view_mode = QkViewMode::NodeCode(curr_node.unwrap());
           }
 
           let canvas_pos = Pointf::from(ui.cursor_screen_pos());
@@ -208,26 +225,100 @@ impl QkApp {
           draw_list.channels_split(2, |channels| {
             channels.set_current(1);
 
-            self.cluster.nodes.iter().for_each(|n| {
-              let ui_element_state = match &self.node_selection {
-                QkNodeSelection::None => { UiElementState::NotSelected }
-                QkNodeSelection::One(selected_node) => {
-                  if *selected_node == n.name {
-                    UiElementState::Selected
-                  } else {
-                    UiElementState::NotSelected
-                  }
-                }
-                QkNodeSelection::Multiple(names) => {
-                  if names.contains(&n.name) {
-                    UiElementState::Selected
-                  } else {
-                    UiElementState::NotSelected
-                  }
-                }
-              };
-              n.draw(canvas_pos, &draw_list, ui_element_state);
-            });
+            // self.cluster.nodes.iter().for_each(|n| {
+            //   let ui_element_state = match &self.node_selection {
+            //     QkNodeSelection::None => { UiElementState::NotSelected }
+            //     QkNodeSelection::One(selected_node) => {
+            //       if *selected_node == n.name {
+            //         UiElementState::Selected
+            //       } else {
+            //         UiElementState::NotSelected
+            //       }
+            //     }
+            //     QkNodeSelection::Multiple(names) => {
+            //       if names.contains(&n.name) {
+            //         UiElementState::Selected
+            //       } else {
+            //         UiElementState::NotSelected
+            //       }
+            //     }
+            //   };
+            //   n.draw(canvas_pos, &draw_list, ui_element_state);
+            // });
+
+            // Draw under
+
+            // channels.set_current(0);
+            // let center = [canvas_pos[0] + RADIUS, canvas_pos[1] + RADIUS];
+            // draw_list
+            //     .add_circle(center, RADIUS, WHITE)
+            //     .thickness(10.0)
+            //     .num_segments(50)
+            //     .build();
+          });
+        });
+  }
+
+  /// Draw a window "BrowseWindow" (it will retain size of previous BrowseWindow) for when we're
+  /// viewing a modules, apps and functions of a BEAM node with the name stored in self.view_mode.
+  pub fn node_code_view(&mut self, ui: &mut Ui) {
+    imgui::Window::new(imgui::im_str!("Node Code View###BrowseWindow"))
+        .size([800.0, 500.0], Condition::FirstUseEver)
+        .resizable(true)
+        .build(ui, || {
+          if self.show_help {
+            ui.text(im_str!("Double click Modules to show contents. Code menu above shows available relations"));
+          }
+
+          if ui.button(im_str!("Return to Node"), [0.0, 0.0]) {
+            let curr_node = self.view_mode.get_node();
+            self.view_mode = QkViewMode::Node(curr_node.unwrap());
+          }
+
+          let canvas_pos = Pointf::from(ui.cursor_screen_pos());
+          // let mouse_pos = Pointf::from(ui.io().mouse_pos) - canvas_pos;
+
+          // if ui.is_mouse_clicked(MouseButton::Left) {
+          //   // A click can find 0 or 1 object
+          //   self.node_selection = self.try_select_one_node(&mouse_pos);
+          // } else if ui.is_mouse_double_clicked(MouseButton::Left) {
+          //   // Double Clicking a node, also enter the node inner view
+          //   self.node_selection = self.try_select_one_node(&mouse_pos);
+          //   if let QkNodeSelection::One(node_name) = self.node_selection {
+          //     self.view_mode = QkViewMode::Node(node_name)
+          //   }
+          // }
+
+          let draw_list = ui.get_window_draw_list();
+          // Will draw channel 0 first, then channel 1, whatever the order of
+          // the calls in the code.
+          //
+          // Here, we draw a red line on channel 1 then a white circle on
+          // channel 0. As a result, the red line will always appear on top of
+          // the white circle.
+          draw_list.channels_split(2, |channels| {
+            channels.set_current(1);
+
+            // self.cluster.nodes.iter().for_each(|n| {
+            //   let ui_element_state = match &self.node_selection {
+            //     QkNodeSelection::None => { UiElementState::NotSelected }
+            //     QkNodeSelection::One(selected_node) => {
+            //       if *selected_node == n.name {
+            //         UiElementState::Selected
+            //       } else {
+            //         UiElementState::NotSelected
+            //       }
+            //     }
+            //     QkNodeSelection::Multiple(names) => {
+            //       if names.contains(&n.name) {
+            //         UiElementState::Selected
+            //       } else {
+            //         UiElementState::NotSelected
+            //       }
+            //     }
+            //   };
+            //   n.draw(canvas_pos, &draw_list, ui_element_state);
+            // });
 
             // Draw under
 
