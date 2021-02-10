@@ -27,7 +27,7 @@ pub struct BeamNode {
   layout: Layout,
 
   /// Static (more or less static) resources, such as code structure
-  pub(crate) code: Box<BeamCodeServer>,
+  pub code: BeamCodeServer,
 
   /// Processes
   processes: HashMap<Pid, BeamProcess>,
@@ -48,11 +48,11 @@ impl BeamNode {
     BeamNode {
       name,
       hidden,
-      code: Box::new(BeamCodeServer::new()),
+      code: BeamCodeServer::new(),
       connected_to: Vec::new(),
       connected_to_all: false,
       processes: HashMap::new(),
-      layout: Layout::new(Pointf::new(40.0, 30.0)),
+      layout: Layout::new(Pointf::new_random()),
       rel_call: petgraph::Graph::new(),
     }
   }
@@ -98,7 +98,7 @@ impl TDrawable for BeamNode {
     const SELECTED_COLOR: [f32; 4] = [0.4, 0.7, 1.0, 1.0];
 
     let draw_color = match ui_element_state {
-      UiElementState::NotSelected => { WHITE }
+      UiElementState::Normal => { WHITE }
       UiElementState::Selected => { SELECTED_COLOR }
     };
 

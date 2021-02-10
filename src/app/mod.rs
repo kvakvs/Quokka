@@ -10,6 +10,8 @@ use crate::window::main::pointer_mode::QkPointerMode;
 use crate::window::main::process_selection::QkProcessSelection;
 use qk_livesystem::ui::ui_element_state::UiElementState;
 use qk_livesystem::ui::draw::TDrawable;
+use qk_livesystem::beam_node::BeamNode;
+use crate::window::main::code_selection::QkCodeSelection;
 
 #[allow(dead_code)]
 #[derive(Copy, Clone)]
@@ -40,8 +42,11 @@ pub struct QkApp {
   pub camera_offset: Pointf,
   pub cluster: BeamCluster,
 
-  /// Whether none, one or multiple NODES in the CLUSTER view are selected
+  /// For Cluster view: Whether none, one or multiple NODES in the CLUSTER view are selected
   pub node_selection: QkNodeSelection,
+
+  /// For Code view: selected modules and functions
+  pub code_selection: QkCodeSelection,
 
   /// Whether none, one or multiple PROCESSES in the NODE view are selected
   pub process_selection: QkProcessSelection,
@@ -59,6 +64,7 @@ impl QkApp {
       camera_offset: Pointf::new(0.0, 0.0),
       cluster: Default::default(),
       node_selection: Default::default(),
+      code_selection: Default::default(),
       process_selection: Default::default(),
       pointer_mode: Default::default(),
     }
@@ -100,9 +106,11 @@ impl QkApp {
 
   /// Attempt to hit one node with mouse_pos, return QkNodeSelection as a result (one or none).
   pub fn try_select_one_node(&mut self, mouse_pos: &Pointf) -> QkNodeSelection {
-    if let Some(node) = self.cluster.nodes.iter().find(|node| {
-      node.is_mouse_hit(mouse_pos)
-    }) {
+    if let Some((_key, node)) = self.cluster.nodes
+        .iter()
+        .find(|(key1, node1)| {
+          node1.is_mouse_hit(mouse_pos)
+        }) {
       QkNodeSelection::One(node.name)
     } else {
       QkNodeSelection::None
@@ -147,21 +155,21 @@ impl QkApp {
           draw_list.channels_split(2, |channels| {
             channels.set_current(1);
 
-            self.cluster.nodes.iter().for_each(|n| {
+            self.cluster.nodes.iter().for_each(|(key, n)| {
               let ui_element_state = match &self.node_selection {
-                QkNodeSelection::None => { UiElementState::NotSelected }
+                QkNodeSelection::None => { UiElementState::Normal }
                 QkNodeSelection::One(selected_node) => {
                   if *selected_node == n.name {
                     UiElementState::Selected
                   } else {
-                    UiElementState::NotSelected
+                    UiElementState::Normal
                   }
                 }
                 QkNodeSelection::Multiple(names) => {
                   if names.contains(&n.name) {
                     UiElementState::Selected
                   } else {
-                    UiElementState::NotSelected
+                    UiElementState::Normal
                   }
                 }
               };
@@ -201,7 +209,7 @@ impl QkApp {
             self.view_mode = QkViewMode::NodeCode(curr_node.unwrap());
           }
 
-          let canvas_pos = Pointf::from(ui.cursor_screen_pos());
+          let _canvas_pos = Pointf::from(ui.cursor_screen_pos());
           // let mouse_pos = Pointf::from(ui.io().mouse_pos) - canvas_pos;
 
           // if ui.is_mouse_clicked(MouseButton::Left) {
@@ -299,26 +307,25 @@ impl QkApp {
           draw_list.channels_split(2, |channels| {
             channels.set_current(1);
 
-            // self.cluster.nodes.iter().for_each(|n| {
-            //   let ui_element_state = match &self.node_selection {
-            //     QkNodeSelection::None => { UiElementState::NotSelected }
-            //     QkNodeSelection::One(selected_node) => {
-            //       if *selected_node == n.name {
-            //         UiElementState::Selected
-            //       } else {
-            //         UiElementState::NotSelected
-            //       }
-            //     }
-            //     QkNodeSelection::Multiple(names) => {
-            //       if names.contains(&n.name) {
-            //         UiElementState::Selected
-            //       } else {
-            //         UiElementState::NotSelected
-            //       }
-            //     }
-            //   };
-            //   n.draw(canvas_pos, &draw_list, ui_element_state);
-            // });
+            let node_name = self.view_mode.get_node().unwrap();
+            let node = self.cluster.nodes.get(&node_name).unwrap();
+
+            node.code.modules.iter().for_each(|(mod_name, module)| {
+
+              let ui_element_state = match &self.code_selection {
+                QkCodeSelection::None => { UiElementState::Normal }
+                QkCodeSelection::OneModule(selected_mod) => {
+                  if *selected_mod == *mod_name {
+                    UiElementState::Selected
+                  } else {
+                    UiElementState::Normal
+                  }
+                }
+                QkCodeSelection::MultipleModules(_) => { UiElementState::Normal }
+              };
+
+              module.draw(canvas_pos, &draw_list, ui_element_state);
+            });
 
             // Draw under
 

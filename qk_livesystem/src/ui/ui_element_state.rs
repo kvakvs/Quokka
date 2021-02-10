@@ -1,6 +1,6 @@
 #[derive(Copy, Clone)]
 pub enum UiElementState {
-  NotSelected,
+  Normal,
   Selected,
   // Dragging,
 }

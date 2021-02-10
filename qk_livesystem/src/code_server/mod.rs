@@ -9,8 +9,8 @@ pub mod beam_function;
 /// Represents loaded code, apps, modules, functions.
 #[derive(Debug)]
 pub struct BeamCodeServer {
-  // otp_apps: HashMap<String, OTPApplication>
-  modules: HashMap<Atom, Box<BeamModule>>,
+  // TODO: otp_apps: HashMap<String, OTPApplication>
+  pub modules: HashMap<Atom, Box<BeamModule>>,
 }
 
 impl Default for BeamCodeServer {
@@ -28,13 +28,6 @@ impl BeamCodeServer {
 
   pub fn get_or_create_module(&mut self, module: Atom) -> &mut Box<BeamModule> {
     self.modules.entry(module).or_insert_with(|| Box::new(BeamModule::new(module)))
-    //   None => {
-    //     let new_mod = ;
-    //     self.modules[module] = new_mod.clone();
-    //     new_mod
-    //   }
-    //   Some(mod_box) => mod_box.clone(),
-    // }
   }
 
   /// Inform the Code Server, that some MFA exists in the code (been recently used or learned from

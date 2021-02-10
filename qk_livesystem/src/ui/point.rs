@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::fmt;
 use std::fmt::Debug;
 use crate::ui::size::Sizef;
@@ -35,6 +36,13 @@ impl Debug for Pointf {
 impl Pointf {
   pub fn new(x: f32, y: f32) -> Self {
     Pointf { x, y }
+  }
+  pub fn new_random() -> Self {
+    let mut rng = rand::thread_rng();
+    Pointf {
+      x: rng.gen::<f32>() * 800.0,
+      y: rng.gen::<f32>() * 500.0,
+    }
   }
 }
 
