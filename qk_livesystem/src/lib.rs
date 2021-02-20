@@ -10,6 +10,7 @@ pub mod beam_node;
 pub mod beam_process;
 pub mod code_server;
 pub mod ui;
+pub mod force_directed_layout;
 
 use chrono::Utc;
 

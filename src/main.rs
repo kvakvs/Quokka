@@ -22,8 +22,8 @@ fn main() {
     quokka_menubar(ui, run, &mut state);
     match state.view_mode {
       QkViewMode::Cluster => { state.cluster_view(ui) }
-      QkViewMode::Node(_) => { state.node_view(ui) }
-      QkViewMode::NodeCode(_) => { state.node_code_view(ui) }
+      QkViewMode::Node(node_name) => { state.node_view(ui, node_name) }
+      QkViewMode::NodeCode(node_name) => { state.node_code_view(ui, node_name) }
     }
     // state.cluster_view(ui);
     // state.node_view(ui);

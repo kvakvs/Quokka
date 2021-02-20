@@ -9,13 +9,14 @@ use crate::ui::point::Pointf;
 use crate::ui::draw::TDrawable;
 use crate::ui::ui_element_state::UiElementState;
 use crate::ui::size::Sizef;
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug)]
 pub struct BeamModule {
   name: Atom,
 
   /// UI section: positioning, classification, tags, colors, grouping
-  layout: Layout,
+  pub layout: Layout,
 
   /// Whether the renderer will show the functions inside, or just the module itself
   editor_unfold: bool,

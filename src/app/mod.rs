@@ -11,6 +11,7 @@ use crate::window::main::process_selection::QkProcessSelection;
 use qk_livesystem::ui::ui_element_state::UiElementState;
 use qk_livesystem::ui::draw::TDrawable;
 use qk_livesystem::beam_node::BeamNode;
+use qk_livesystem::force_directed_layout;
 use crate::window::main::code_selection::QkCodeSelection;
 
 #[allow(dead_code)]
@@ -78,15 +79,6 @@ impl QkApp {
     // Representation of the live system as we know it
     self.cluster.load_data_stream(ef_log);
   }
-
-  // pub fn set_view_mode(this_rw: &RwLock<QkAppState>, view_mode: QkViewMode) {
-  //   let mut this = this_rw.write().unwrap();
-  //
-  //   this.view_mode = view_mode;
-  //   // TODO: Redraw the window
-  //
-  //   drop(this);
-  // }
 
   pub fn read_with<T, TFun>(state_rwlock: &RwLock<Self>, func: TFun) -> T
     where TFun: Fn(&Self) -> T {
@@ -191,7 +183,7 @@ impl QkApp {
 
   /// Draw a window "BrowseWindow" (it will retain size of previous BrowseWindow) for when we're
   /// viewing a BEAM node with the name stored in self.view_mode.
-  pub fn node_view(&mut self, ui: &mut Ui) {
+  pub fn node_view(&mut self, ui: &mut Ui, node_name: Atom) {
     imgui::Window::new(imgui::im_str!("Node View###BrowseWindow"))
         .size([800.0, 500.0], Condition::FirstUseEver)
         .resizable(true)
@@ -269,7 +261,7 @@ impl QkApp {
 
   /// Draw a window "BrowseWindow" (it will retain size of previous BrowseWindow) for when we're
   /// viewing a modules, apps and functions of a BEAM node with the name stored in self.view_mode.
-  pub fn node_code_view(&mut self, ui: &mut Ui) {
+  pub fn node_code_view(&mut self, ui: &mut Ui, node_name: Atom) {
     imgui::Window::new(imgui::im_str!("Node Code View###BrowseWindow"))
         .size([800.0, 500.0], Condition::FirstUseEver)
         .resizable(true)
@@ -278,9 +270,13 @@ impl QkApp {
             ui.text(im_str!("Double click Modules to show contents. Code menu above shows available relations"));
           }
 
-          if ui.button(im_str!("Return to Node"), [0.0, 0.0]) {
+          if ui.button(im_str!("Return to Node"), [128.0, 0.0]) {
             let curr_node = self.view_mode.get_node();
             self.view_mode = QkViewMode::Node(curr_node.unwrap());
+          }
+          ui.same_line(140.0);
+          if ui.button(im_str!("Re-layout"), [0.0, 0.0]) {
+            self.re_layout_code_graph(node_name);
           }
 
           let canvas_pos = Pointf::from(ui.cursor_screen_pos());
@@ -307,11 +303,9 @@ impl QkApp {
           draw_list.channels_split(2, |channels| {
             channels.set_current(1);
 
-            let node_name = self.view_mode.get_node().unwrap();
             let node = self.cluster.nodes.get(&node_name).unwrap();
 
             node.code.modules.iter().for_each(|(mod_name, module)| {
-
               let ui_element_state = match &self.code_selection {
                 QkCodeSelection::None => { UiElementState::Normal }
                 QkCodeSelection::OneModule(selected_mod) => {
@@ -324,7 +318,9 @@ impl QkApp {
                 QkCodeSelection::MultipleModules(_) => { UiElementState::Normal }
               };
 
-              module.draw(canvas_pos, &draw_list, ui_element_state);
+              let module_lock = module.read().unwrap();
+              module_lock.draw(canvas_pos, &draw_list, ui_element_state);
+              drop(module_lock);
             });
 
             // Draw under
@@ -338,5 +334,37 @@ impl QkApp {
             //     .build();
           });
         });
+  }
+
+
+  /// For code graph do the force-directed repositioning of nodes grouping them like so:
+  /// - Modules are mutually repulsed and attracted to the visible window center
+  /// - Functions of nodes are attracted to nodes, repulsed by other functions in same module
+  /// - If some edge overlay is activated such as "call" relationships, they also might do something
+  fn re_layout_code_graph(&self, node_name: Atom) {
+    let node = self.cluster.nodes.get(&node_name).unwrap();
+
+    // For every item in node modules...
+    node.code.modules.iter().for_each(|(mod_name, module)| {
+      let module1_lock = module.read().unwrap();
+      let mut force = force_directed_layout::Force::new();
+
+      // For every other module in modules (where name is not equal to mod_name)
+      // add a repulsive force
+      node.code.modules.iter().for_each(|(mod_name2, module2)| {
+        let module2_lock = module2.read().unwrap();
+
+        force.add_force(
+          &module1_lock.layout,
+          &module2_lock.layout,
+          1.0);
+
+        drop(module2_lock);
+      });
+
+      drop(module1_lock);
+
+      // Store the force to be applied on the next pass
+    });
   }
 }
