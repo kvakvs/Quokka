@@ -24,25 +24,26 @@ impl Debug for Layout {
 
 impl Layout {
   pub fn new(pos: Pointf) -> Self {
-    Layout {
+    let mut r = Layout {
       center_pos: pos,
       size: Self::size_or_default(None),
       draw_box: Default::default(),
-    }.update_draw_box()
+    };
+    r.update_draw_box();
+    r
   }
 
   fn size_or_default(sz: Option<Sizef>) -> Sizef {
     sz.unwrap_or_else(|| Sizef::new(20.0, 20.0))
   }
 
-  fn update_draw_box(mut self) -> Self {
+  pub fn update_draw_box(&mut self) {
     let origin = Pointf::new(
       self.center_pos.x - 0.5 * self.size.x,
       self.center_pos.y - 0.5 * self.size.y,
     );
 
     self.draw_box = Rectf::new(origin, origin + self.size);
-    self
   }
 }
 

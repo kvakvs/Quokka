@@ -276,7 +276,9 @@ impl QkApp {
           }
           ui.same_line(140.0);
           if ui.button(im_str!("Re-layout"), [0.0, 0.0]) {
-            self.re_layout_code_graph(node_name);
+            for i in 0..100 {
+              self.re_layout_code_graph(node_name);
+            }
           }
 
           let canvas_pos = Pointf::from(ui.cursor_screen_pos());
@@ -343,28 +345,58 @@ impl QkApp {
   /// - If some edge overlay is activated such as "call" relationships, they also might do something
   fn re_layout_code_graph(&self, node_name: Atom) {
     let node = self.cluster.nodes.get(&node_name).unwrap();
+    let attraction_point = Pointf::new(700.0, 300.0);
 
     // For every item in node modules...
-    node.code.modules.iter().for_each(|(mod_name, module)| {
-      let module1_lock = module.read().unwrap();
+    node.code.modules.iter().for_each(|(mod1_name, module1)| {
       let mut force = force_directed_layout::Force::new();
 
-      // For every other module in modules (where name is not equal to mod_name)
-      // add a repulsive force
-      node.code.modules.iter().for_each(|(mod_name2, module2)| {
-        let module2_lock = module2.read().unwrap();
+      // Parameters from
+      // https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf
+      const ATTRACTION_STRENGTH: f32 = 1.0;
 
-        force.add_force(
-          &module1_lock.layout,
-          &module2_lock.layout,
-          1.0);
+      // Mutual node repulsion
+      const REPULSION_STRENGTH: f32 = 5.0;
+      const APPLY_FORCES_MAGNITUDE: f32 = 0.1; // C4 in the PDF (force multiplier)
 
-        drop(module2_lock);
-      });
+      {
+        let module1_lock = module1.read().unwrap();
+        // For every other module in modules (where name is not equal to mod_name)
+        // add a repulsive force
+        node.code.modules.iter().for_each(|(mod2_name, module2)| {
+          if mod1_name == mod2_name { return; }
 
-      drop(module1_lock);
+          {
+            let module2_lock = module2.read().unwrap();
+
+            // Repulsion force from all other nodes - inverse square rule
+            force.add_repulsion_force(
+              &module1_lock.layout.center_pos,
+              &module2_lock.layout.center_pos,
+              REPULSION_STRENGTH);
+
+            drop(module2_lock);
+          }
+        });
+
+        // Attraction force to the center of screen, a logarithmic spring
+        force.add_attraction_force(&attraction_point,
+                                   &module1_lock.layout.center_pos,
+                                   ATTRACTION_STRENGTH);
+
+        drop(module1_lock);
+      }
 
       // Store the force to be applied on the next pass
+      {
+        let mut module1_w = module1.write().unwrap();
+        module1_w.layout.center_pos += force.p * APPLY_FORCES_MAGNITUDE;
+
+        println!("Apply to {:?} f={:?}", mod1_name, force.p);
+
+        module1_w.layout.update_draw_box();
+        drop(module1_w);
+      }
     });
   }
 }
